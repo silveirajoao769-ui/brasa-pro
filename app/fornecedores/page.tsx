@@ -37,9 +37,10 @@ export default async function SuppliersPage() {
   ]);
 
   const supplierMap = new Map((suppliers || []).map((supplier) => [supplier.id, supplier.name]));
-  const groups = new Map<string, typeof products>();
+  const productRows = products || [];
+  const groups = new Map<string, typeof productRows>();
 
-  for (const product of products || []) {
+  for (const product of productRows) {
     const key = normalizeName(product.name);
     const current = groups.get(key) || [];
     current.push(product);
@@ -90,7 +91,7 @@ export default async function SuppliersPage() {
           </article>
           <article>
             <small>PREÇOS CADASTRADOS</small>
-            <strong>{products?.length || 0}</strong>
+            <strong>{productRows.length}</strong>
             <span>Produtos monitorados</span>
           </article>
           <article>
@@ -140,7 +141,7 @@ export default async function SuppliersPage() {
                       </span>
                       <small>{supplier.phone || supplier.email || "Sem contato informado"}</small>
                     </div>
-                    <em>{products?.filter((product) => product.supplier_id === supplier.id).length || 0} preços</em>
+                    <em>{productRows.filter((product) => product.supplier_id === supplier.id).length} preços</em>
                   </div>
                 ))}
               </div>
