@@ -38,7 +38,7 @@ export default async function PlanPage() {
 
   const plan = subscription?.plan || "free";
   const isPro = plan === "pro" && subscription?.status === "active";
-  const checkoutUrl = process.env.NEXT_PUBLIC_CAKTO_CHECKOUT_URL || null;
+  const checkoutUrl = process.env.NEXT_PUBLIC_CAKTO_CHECKOUT_URL || "https://pay.cakto.com.br/6pdqeej_1163437";
 
   return (
     <main className="plan-page">
