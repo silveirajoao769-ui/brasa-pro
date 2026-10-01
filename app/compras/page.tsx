@@ -131,6 +131,9 @@ export default async function PurchasesPage() {
                       <Link href={"/churrascos/" + list.barbecue_id} className="ghost-button">
                         Ver churrasco →
                       </Link>
+                      <Link href="/parceiros" className="primary-button compact">
+                        Comprar com parceiro
+                      </Link>
                     </div>
                   </div>
 
