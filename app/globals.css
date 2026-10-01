@@ -1576,3 +1576,205 @@ footer { border-top: 1px solid var(--line); padding: 30px 0; }
     grid-column: 1 / -1;
   }
 }
+
+
+/* Detailed cuts and interactive shopping */
+.cut-planner {
+  margin: 18px 0 14px;
+  padding: 18px;
+  border: 1px solid var(--line);
+  border-radius: 16px;
+  background: rgba(255,255,255,.016);
+}
+.cut-planner-heading,
+.planned-breakdown-heading {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  gap: 18px;
+  margin-bottom: 14px;
+}
+.cut-planner-heading h4,
+.planned-breakdown-heading h4 {
+  margin: 5px 0 0;
+  font-size: 18px;
+}
+.cut-planner-heading > small {
+  color: #737c85;
+  font-size: 9px;
+}
+.cut-selector {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 8px;
+}
+.cut-option {
+  min-height: 70px;
+  border-radius: 12px;
+  border: 1px solid var(--line);
+  background: #0b0f13;
+  color: #fff;
+  display: grid;
+  grid-template-columns: 30px 1fr;
+  gap: 10px;
+  align-items: center;
+  padding: 10px;
+  text-align: left;
+  cursor: pointer;
+}
+.cut-option > span {
+  width: 28px;
+  height: 28px;
+  border-radius: 8px;
+  display: grid;
+  place-items: center;
+  border: 1px solid rgba(255,255,255,.12);
+  color: #7d8790;
+  font-weight: 900;
+}
+.cut-option > div {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+.cut-option b {
+  font-size: 11px;
+}
+.cut-option small {
+  color: #707982;
+  font-size: 8px;
+}
+.cut-option.selected {
+  border-color: rgba(255,106,0,.32);
+  background: rgba(255,106,0,.045);
+}
+.cut-option.selected > span {
+  color: #fff;
+  border-color: rgba(255,106,0,.35);
+  background: linear-gradient(135deg, #ff5f00, #ff9120);
+}
+.planned-breakdown {
+  margin: 14px 0;
+  padding: 18px;
+  border: 1px solid rgba(255,106,0,.16);
+  border-radius: 16px;
+  background:
+    radial-gradient(circle at 90% 5%, rgba(255,106,0,.05), transparent 24%),
+    rgba(255,255,255,.012);
+}
+.planned-breakdown-heading > strong {
+  color: var(--orange-2);
+  font-size: 24px;
+  letter-spacing: -.8px;
+}
+.planned-items-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 7px;
+}
+.planned-item {
+  min-height: 62px;
+  display: grid;
+  grid-template-columns: 95px 1fr auto;
+  gap: 10px;
+  align-items: center;
+  padding: 9px 11px;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  background: rgba(255,255,255,.014);
+}
+.planned-item > span {
+  color: var(--orange-2);
+  font-size: 8px;
+  font-weight: 900;
+  text-transform: uppercase;
+}
+.planned-item > div {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  min-width: 0;
+}
+.planned-item b {
+  font-size: 10px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.planned-item small {
+  color: #707982;
+  font-size: 8px;
+}
+.planned-item > strong {
+  font-size: 10px;
+}
+
+.shopping-preview button.shopping-preview-row {
+  width: 100%;
+  color: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+.shopping-preview-row.checked-row {
+  opacity: .62;
+}
+.shopping-preview-row.checked-row b {
+  text-decoration: line-through;
+}
+.shopping-progress {
+  margin-top: 18px;
+  margin-bottom: 10px;
+  display: grid;
+  gap: 8px;
+}
+.shopping-progress > div:first-child {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  font-size: 9px;
+}
+.shopping-progress span {
+  color: #747d86;
+}
+.shopping-progress b {
+  color: #cbd1d7;
+}
+.shopping-progress-track {
+  height: 6px;
+  border-radius: 999px;
+  overflow: hidden;
+  background: rgba(255,255,255,.06);
+}
+.shopping-progress-track span {
+  display: block;
+  height: 100%;
+  border-radius: 999px;
+  background: linear-gradient(90deg, #ff6200, #ff9a1f);
+  transition: width .2s ease;
+}
+
+@media (max-width: 980px) {
+  .cut-selector {
+    grid-template-columns: 1fr 1fr;
+  }
+  .planned-items-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 640px) {
+  .cut-planner-heading,
+  .planned-breakdown-heading {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+  .cut-selector {
+    grid-template-columns: 1fr;
+  }
+  .planned-item {
+    grid-template-columns: 1fr auto;
+  }
+  .planned-item > span {
+    grid-column: 1 / -1;
+  }
+}
