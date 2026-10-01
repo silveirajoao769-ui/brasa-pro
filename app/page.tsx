@@ -54,8 +54,8 @@ export default function Home() {
           </div>
 
           <div className="nav-actions">
-            <Link className="ghost-button" href="/dashboard">Entrar</Link>
-            <Link className="primary-button compact" href="/planejar">Comece agora</Link>
+            <Link className="ghost-button" href="/login">Entrar</Link>
+            <Link className="primary-button compact" href="/cadastro">Comece agora</Link>
           </div>
         </nav>
 
@@ -80,7 +80,7 @@ export default function Home() {
                   </div>
                   <h3>{persona.title}</h3>
                   <p>{persona.description}</p>
-                  <Link href={index === 0 ? "/planejar" : index === 1 ? "/dashboard" : "#planos"} aria-label={"Abrir " + persona.title}>→</Link>
+                  <Link href={index === 0 ? "/planejar" : index === 1 ? "/cadastro" : "#planos"} aria-label={"Abrir " + persona.title}>→</Link>
                 </article>
               ))}
             </div>
@@ -297,7 +297,7 @@ export default function Home() {
                 <li>✓ Custos, margem e lucro</li>
                 <li>✓ Recursos profissionais</li>
               </ul>
-              <Link href="/dashboard" className="primary-button wide">Quero ser Pro →</Link>
+              <Link href="/cadastro" className="primary-button wide">Quero ser Pro →</Link>
             </article>
           </div>
         </div>
