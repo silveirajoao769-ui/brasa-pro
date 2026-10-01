@@ -1,4 +1,9 @@
 import Link from "next/link";
+import { redirect } from "next/navigation";
+import LogoutButton from "@/components/LogoutButton";
+import { createClient } from "@/lib/supabase/server";
+
+export const dynamic = "force-dynamic";
 
 const stats = [
   ["Eventos no mês", "6", "+2 vs mês anterior"],
@@ -13,7 +18,39 @@ const events = [
   ["26 OUT", "Casamento", "120 pessoas", "Orçamento"],
 ];
 
-export default function DashboardPage() {
+export default async function DashboardPage() {
+  const supabase = await createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+
+  if (!user) redirect("/login");
+
+  let { data: profile } = await supabase
+    .from("profiles")
+    .select("full_name, account_type")
+    .eq("id", user.id)
+    .maybeSingle();
+
+  if (!profile) {
+    const fallbackName =
+      typeof user.user_metadata?.full_name === "string"
+        ? user.user_metadata.full_name
+        : user.email?.split("@")[0] || "Churrasqueiro";
+
+    const { data } = await supabase
+      .from("profiles")
+      .upsert({
+        id: user.id,
+        full_name: fallbackName,
+        account_type: "consumer",
+      })
+      .select("full_name, account_type")
+      .single();
+
+    profile = data;
+  }
+
+  const displayName = profile?.full_name?.trim() || "Churrasqueiro";
+
   return (
     <main className="app-page">
       <aside className="app-sidebar">
@@ -29,8 +66,9 @@ export default function DashboardPage() {
           <a href="#">↗ <span>Financeiro</span></a>
         </nav>
         <div className="sidebar-footer">
-          <small>BRASA PRO</small>
-          <b>MVP em construção</b>
+          <small>{profile?.account_type === "professional" ? "CONTA PROFISSIONAL" : "BRASA PRO"}</small>
+          <b>{user.email}</b>
+          <LogoutButton />
         </div>
       </aside>
 
@@ -38,12 +76,12 @@ export default function DashboardPage() {
         <header className="app-header">
           <div>
             <span className="eyebrow">VISÃO GERAL</span>
-            <h1>Seu negócio na brasa. 🔥</h1>
+            <h1>Olá, {displayName}. 🔥</h1>
             <p>Acompanhe eventos, custos e lucro em um só lugar.</p>
           </div>
           <div className="app-header-actions">
             <Link href="/planejar" className="primary-button compact">+ Novo churrasco</Link>
-            <div className="avatar">BP</div>
+            <div className="avatar">{displayName.slice(0, 2).toUpperCase()}</div>
           </div>
         </header>
 
