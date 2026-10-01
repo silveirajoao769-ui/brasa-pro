@@ -80,7 +80,7 @@ export default function Home() {
                   </div>
                   <h3>{persona.title}</h3>
                   <p>{persona.description}</p>
-                  <Link href={index === 0 ? "/planejar" : index === 1 ? "/cadastro" : "#planos"} aria-label={"Abrir " + persona.title}>→</Link>
+                  <Link href={index === 0 ? "/planejar" : index === 1 ? "/cadastro" : "/fornecedor"} aria-label={"Abrir " + persona.title}>→</Link>
                 </article>
               ))}
             </div>
