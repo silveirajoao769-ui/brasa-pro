@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
+import PartnerOrderForm from "@/components/PartnerOrderForm";
 import { createClient } from "@/lib/supabase/server";
 
 export const dynamic = "force-dynamic";
@@ -19,12 +20,15 @@ export default async function PartnerDetailPage({ params }: PageProps) {
   const { slug } = await params;
   const supabase = await createClient();
 
-  const { data: partner } = await supabase
-    .from("partner_profiles")
-    .select("*")
-    .eq("slug", slug)
-    .eq("active", true)
-    .maybeSingle();
+  const [{ data: partner }, authResult] = await Promise.all([
+    supabase
+      .from("partner_profiles")
+      .select("*")
+      .eq("slug", slug)
+      .eq("active", true)
+      .maybeSingle(),
+    supabase.auth.getUser(),
+  ]);
 
   if (!partner) notFound();
 
@@ -36,6 +40,8 @@ export default async function PartnerDetailPage({ params }: PageProps) {
     .order("category")
     .order("name");
 
+  const user = authResult.data.user;
+
   return (
     <main className="partners-page">
       <div className="shell workspace-topbar">
@@ -43,7 +49,10 @@ export default async function PartnerDetailPage({ params }: PageProps) {
           <span className="brand-flame">🔥</span>
           <span><b>Brasa <i>Pro</i></b><small>CATÁLOGO DO PARCEIRO</small></span>
         </Link>
-        <Link href="/parceiros" className="ghost-button">← Parceiros</Link>
+        <div className="detail-actions">
+          {user && <Link href="/pedidos" className="ghost-button">Meus pedidos</Link>}
+          <Link href="/parceiros" className="ghost-button">← Parceiros</Link>
+        </div>
       </div>
 
       <section className="shell partners-content">
@@ -76,21 +85,38 @@ export default async function PartnerDetailPage({ params }: PageProps) {
             <p>Este fornecedor ainda não publicou produtos.</p>
           </div>
         ) : (
-          <div className="partner-product-grid">
-            {products.map((product) => (
-              <article className="partner-catalog-card" key={product.id}>
-                <div className="partner-catalog-icon">🥩</div>
-                <span>{product.category}</span>
-                <h3>{product.name}</h3>
-                <p>{product.description || "Produto disponível no catálogo do parceiro."}</p>
-                <div>
-                  <strong>{money(Number(product.price))}</strong>
-                  <small>/ {product.unit}</small>
-                </div>
-                <button disabled type="button">Pedidos na próxima etapa</button>
-              </article>
-            ))}
-          </div>
+          <>
+            <div className="partner-product-grid">
+              {products.map((product) => (
+                <article className="partner-catalog-card" key={product.id}>
+                  <div className="partner-catalog-icon">🥩</div>
+                  <span>{product.category}</span>
+                  <h3>{product.name}</h3>
+                  <p>{product.description || "Produto disponível no catálogo do parceiro."}</p>
+                  <div>
+                    <strong>{money(Number(product.price))}</strong>
+                    <small>/ {product.unit}</small>
+                  </div>
+                </article>
+              ))}
+            </div>
+
+            <div className="partner-order-section">
+              <PartnerOrderForm
+                partnerId={partner.id}
+                partnerName={partner.business_name}
+                products={products.map((product) => ({
+                  id: product.id,
+                  name: product.name,
+                  unit: product.unit,
+                  price: Number(product.price),
+                }))}
+                deliveryAvailable={Boolean(partner.delivery_available)}
+                pickupAvailable={Boolean(partner.pickup_available)}
+                isLoggedIn={Boolean(user)}
+              />
+            </div>
+          </>
         )}
       </section>
     </main>
