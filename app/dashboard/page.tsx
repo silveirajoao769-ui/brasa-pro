@@ -120,7 +120,7 @@ export default async function DashboardPage() {
           <Link href="/ia-brasa">✦ <span>IA Brasa</span></Link>
           <Link href="/planejar">▦ <span>Calculadora</span></Link>
           <Link href="/receitas">☷ <span>Receitas</span></Link>
-          <a href="#">🛒 <span>Compras</span></a>
+          <Link href="/compras">🛒 <span>Compras</span></Link>
           <Link href="/clientes">♙ <span>Clientes</span></Link>
           <Link href="/eventos">□ <span>Eventos</span></Link>
           <Link href="/eventos">↗ <span>Financeiro</span></Link>
