@@ -125,11 +125,11 @@ export default function Home() {
 
                 <div className="ai-panel">
                   <div>
-                    <span className="eyebrow">✦ PLANEJAMENTO COM IA</span>
+                    <span className="eyebrow">✦ PLANEJAMENTO INTELIGENTE</span>
                     <h3>Churrasco para 25 pessoas</h3>
                     <p>Costela, picanha, linguiça e acompanhamentos.</p>
                   </div>
-                  <Link href="/ia-brasa">Gerar plano →</Link>
+                  <Link href="/planejar">Gerar plano →</Link>
                 </div>
 
                 <div className="mini-feature-row">
@@ -291,7 +291,7 @@ export default function Home() {
               <h3>R$ 39,90 <em>/ mês</em></h3>
               <p>Para quem quer mais controle ou trabalha com churrasco.</p>
               <ul>
-                <li>✓ Planejamento com IA</li>
+                <li>✓ Planejamento avançado</li>
                 <li>✓ Eventos e clientes</li>
                 <li>✓ Orçamentos profissionais</li>
                 <li>✓ Custos, margem e lucro</li>
