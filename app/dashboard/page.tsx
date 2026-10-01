@@ -128,6 +128,7 @@ export default async function DashboardPage() {
           <Link href="/estoque">📦 <span>Estoque</span></Link>
           <Link href="/fornecedores">🚚 <span>Fornecedores</span></Link>
           <Link href="/fornecedor">🏪 <span>Portal fornecedor</span></Link>
+          <Link href="/plano">💳 <span>Plano</span></Link>
         </nav>
         <div className="sidebar-footer">
           <small>{accountLabel}</small>
