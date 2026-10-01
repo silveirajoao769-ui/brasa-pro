@@ -159,14 +159,14 @@ export default async function SupplierPortalPage() {
             ) : (
               <div className="partner-order-list">
                 {orders.map((order) => (
-                  <div className="partner-order-row" key={order.id}>
+                  <Link href={"/pedidos/" + order.id} className="partner-order-row" key={order.id}>
                     <span>#{order.id.slice(0, 6).toUpperCase()}</span>
                     <div>
                       <b>{order.customer_name}</b>
                       <small>{order.fulfillment_type === "delivery" ? "Entrega" : "Retirada"} · {order.status}</small>
                     </div>
                     <strong>{money(Number(order.total))}</strong>
-                  </div>
+                  </Link>
                 ))}
               </div>
             )}
