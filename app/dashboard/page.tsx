@@ -121,6 +121,7 @@ export default async function DashboardPage() {
           <Link href="/planejar">▦ <span>Calculadora</span></Link>
           <Link href="/receitas">☷ <span>Receitas</span></Link>
           <Link href="/compras">🛒 <span>Compras</span></Link>
+          <Link href="/pedidos">🧾 <span>Pedidos</span></Link>
           <Link href="/clientes">♙ <span>Clientes</span></Link>
           <Link href="/eventos">□ <span>Eventos</span></Link>
           <Link href="/eventos">↗ <span>Financeiro</span></Link>
