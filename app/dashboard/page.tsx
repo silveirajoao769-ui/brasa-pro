@@ -124,7 +124,7 @@ export default async function DashboardPage() {
           <Link href="/pedidos">🧾 <span>Pedidos</span></Link>
           <Link href="/clientes">♙ <span>Clientes</span></Link>
           <Link href="/eventos">□ <span>Eventos</span></Link>
-          <Link href="/eventos">↗ <span>Financeiro</span></Link>
+          <Link href="/financeiro">↗ <span>Financeiro</span></Link>
           <Link href="/estoque">📦 <span>Estoque</span></Link>
           <Link href="/fornecedores">🚚 <span>Fornecedores</span></Link>
           <Link href="/fornecedor">🏪 <span>Portal fornecedor</span></Link>
