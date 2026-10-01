@@ -9,7 +9,7 @@ export default function PlanejarPage() {
           <span className="brand-flame">🔥</span>
           <span><b>Brasa <i>Pro</i></b><small>PLANEJAMENTO INTELIGENTE</small></span>
         </Link>
-        <Link href="/dashboard" className="ghost-button">Ir para o dashboard</Link>
+        <div className="detail-actions"><Link href="/ia-brasa" className="ghost-button">✦ Usar IA Brasa</Link><Link href="/dashboard" className="ghost-button">Ir para o dashboard</Link></div>
       </div>
 
       <section className="shell planner-workspace">
