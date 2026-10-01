@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
+import ShoppingChecklist from "@/components/ShoppingChecklist";
 import { createClient } from "@/lib/supabase/server";
 
 export const dynamic = "force-dynamic";
@@ -51,7 +52,7 @@ export default async function BarbecueDetailPage({ params }: PageProps) {
   const [{ data: items }, { data: list }] = await Promise.all([
     supabase
       .from("barbecue_items")
-      .select("id, category, name, quantity, unit")
+      .select("id, category, name, quantity, unit, unit_price")
       .eq("barbecue_id", id)
       .order("category"),
     supabase
@@ -69,12 +70,13 @@ export default async function BarbecueDetailPage({ params }: PageProps) {
     quantity: number;
     unit: string;
     checked: boolean;
+    estimated_price: number | null;
   }> = [];
 
   if (list) {
     const { data } = await supabase
       .from("shopping_list_items")
-      .select("id, category, name, quantity, unit, checked")
+      .select("id, category, name, quantity, unit, checked, estimated_price")
       .eq("shopping_list_id", list.id)
       .order("category");
 
@@ -139,7 +141,14 @@ export default async function BarbecueDetailPage({ params }: PageProps) {
               {(items || []).map((item) => (
                 <div className="item-table-row" key={item.id}>
                   <span className="item-category">{item.category}</span>
-                  <div><b>{item.name}</b><small>Calculado pelo Brasa Pro</small></div>
+                  <div>
+                    <b>{item.name}</b>
+                    <small>
+                      {item.unit_price
+                        ? money(Number(item.unit_price)) + "/" + item.unit
+                        : "Calculado pelo Brasa Pro"}
+                    </small>
+                  </div>
                   <strong>{Number(item.quantity).toLocaleString("pt-BR")} {item.unit}</strong>
                 </div>
               ))}
@@ -152,33 +161,17 @@ export default async function BarbecueDetailPage({ params }: PageProps) {
               <span className="list-count">{shoppingItems.length} itens</span>
             </div>
 
-            <div className="shopping-preview">
-              {shoppingItems.length === 0 ? (
-                <div className="empty-state">
-                  <span>🛒</span>
-                  <b>Lista ainda vazia</b>
-                  <p>Crie um novo planejamento para gerar os itens automaticamente.</p>
-                </div>
-              ) : (
-                shoppingItems.map((item) => (
-                  <div className="shopping-preview-row" key={item.id}>
-                    <span className={item.checked ? "check-box checked" : "check-box"}>{item.checked ? "✓" : ""}</span>
-                    <div><b>{item.name}</b><small>{item.category}</small></div>
-                    <strong>{Number(item.quantity).toLocaleString("pt-BR")} {item.unit}</strong>
-                  </div>
-                ))
-              )}
-            </div>
+            <ShoppingChecklist items={shoppingItems} />
           </article>
         </div>
 
         <article className="detail-panel next-step-panel">
           <div>
-            <span className="eyebrow">PRÓXIMO PASSO DO PRODUTO</span>
-            <h2>Agora vamos quebrar “carnes variadas” em cortes reais.</h2>
+            <span className="eyebrow">PLANEJAMENTO DETALHADO</span>
+            <h2>Agora o Brasa Pro já calcula cortes reais e lista de compras.</h2>
             <p>
-              A próxima evolução vai permitir escolher picanha, costela, linguiça, frango,
-              bebidas e acompanhamentos individualmente, com preço e quantidade por item.
+              O próximo passo será permitir trocar quantidades manualmente, ajustar preços
+              locais e transformar o planejamento em orçamento profissional com um clique.
             </p>
           </div>
           <Link href="/planejar" className="primary-button">Criar outro planejamento →</Link>
