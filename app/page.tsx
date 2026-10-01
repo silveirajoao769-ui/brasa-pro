@@ -129,7 +129,7 @@ export default function Home() {
                     <h3>Churrasco para 25 pessoas</h3>
                     <p>Costela, picanha, linguiça e acompanhamentos.</p>
                   </div>
-                  <button>Gerar plano →</button>
+                  <Link href="/ia-brasa">Gerar plano →</Link>
                 </div>
 
                 <div className="mini-feature-row">
