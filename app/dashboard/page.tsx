@@ -117,13 +117,15 @@ export default async function DashboardPage() {
         <Link href="/" className="app-logo">🔥 <b>Brasa <i>Pro</i></b></Link>
         <nav>
           <Link className="active" href="/dashboard">⌂ <span>Dashboard</span></Link>
-          <Link href="/ia-brasa">✦ <span>IA Brasa</span></Link>
+          <Link href="/planejar">✦ <span>Planejamento</span></Link>
           <Link href="/planejar">▦ <span>Calculadora</span></Link>
           <Link href="/receitas">☷ <span>Receitas</span></Link>
           <Link href="/compras">🛒 <span>Compras</span></Link>
           <Link href="/clientes">♙ <span>Clientes</span></Link>
           <Link href="/eventos">□ <span>Eventos</span></Link>
           <Link href="/eventos">↗ <span>Financeiro</span></Link>
+          <Link href="/estoque">📦 <span>Estoque</span></Link>
+          <Link href="/fornecedores">🚚 <span>Fornecedores</span></Link>
         </nav>
         <div className="sidebar-footer">
           <small>{accountLabel}</small>
@@ -215,7 +217,7 @@ export default async function DashboardPage() {
             <span className="eyebrow">✦ IA BRASA</span>
             <h2>Planeje o próximo churrasco</h2>
             <p>O planejador já salva convidados, orçamento, quantidades e lista de compras na sua conta.</p>
-            <Link href="/ia-brasa" className="primary-button">Planejar com IA →</Link>
+            <Link href="/planejar" className="primary-button">Começar planejamento →</Link>
           </article>
 
           <article className="dashboard-panel">
