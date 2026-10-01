@@ -682,3 +682,18 @@ footer { border-top: 1px solid var(--line); padding: 30px 0; }
   .planner-workspace .section-heading h1 { font-size: 45px; letter-spacing: -2px; }
   .next-build-card { align-items: flex-start; flex-direction: column; }
 }
+
+
+.ghost-button, .primary-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  text-decoration: none;
+}
+.persona-card > a {
+  position: absolute; bottom: 14px; right: 14px;
+  width: 31px; height: 31px; border-radius: 50%;
+  border: 1px solid rgba(255,106,0,.5);
+  background: rgba(255,106,0,.08); color: var(--orange-2);
+  display: grid; place-items: center;
+}
