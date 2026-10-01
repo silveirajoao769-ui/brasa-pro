@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
+import ShareQuoteActions from "@/components/ShareQuoteActions";
 import { createClient } from "@/lib/supabase/server";
 
 export const dynamic = "force-dynamic";
@@ -80,6 +81,19 @@ export default async function QuotePage({ params }: PageProps) {
         <div className="detail-actions">
           <Link href={"/eventos/" + event.id} className="ghost-button">← Voltar ao evento</Link>
         </div>
+      </div>
+
+      <div className="shell quote-owner-actions">
+        <div>
+          <span className="eyebrow">ENVIO AO CLIENTE</span>
+          <h2>Compartilhe a proposta e receba a aprovação online.</h2>
+          <p>Status atual: <b>{quote.status}</b></p>
+        </div>
+        <ShareQuoteActions
+          quoteId={quote.id}
+          publicToken={quote.public_token}
+          status={quote.status}
+        />
       </div>
 
       <section className="quote-document">
