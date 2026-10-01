@@ -5,18 +5,21 @@ import { createClient } from "@/lib/supabase/server";
 
 export const dynamic = "force-dynamic";
 
-const stats = [
-  ["Eventos no mês", "6", "+2 vs mês anterior"],
-  ["Receita prevista", "R$ 18.450", "3 eventos confirmados"],
-  ["Lucro estimado", "R$ 7.820", "42,4% de margem"],
-  ["Clientes ativos", "14", "5 novos no mês"],
-];
+function money(value: number) {
+  return new Intl.NumberFormat("pt-BR", {
+    style: "currency",
+    currency: "BRL",
+    maximumFractionDigits: 0,
+  }).format(value);
+}
 
-const events = [
-  ["05 OUT", "Churrasco aniversário", "35 pessoas", "Planejado"],
-  ["12 OUT", "Evento corporativo", "80 pessoas", "Confirmado"],
-  ["26 OUT", "Casamento", "120 pessoas", "Orçamento"],
-];
+function shortDate(value: string | null) {
+  if (!value) return "SEM DATA";
+  return new Intl.DateTimeFormat("pt-BR", {
+    day: "2-digit",
+    month: "short",
+  }).format(new Date(value)).toUpperCase().replace(".", "");
+}
 
 export default async function DashboardPage() {
   const supabase = await createClient();
@@ -49,7 +52,64 @@ export default async function DashboardPage() {
     profile = data;
   }
 
+  const [
+    barbecueCountResult,
+    clientCountResult,
+    recentBarbecuesResult,
+    eventsResult,
+  ] = await Promise.all([
+    supabase
+      .from("barbecues")
+      .select("id", { count: "exact", head: true })
+      .eq("user_id", user.id),
+    supabase
+      .from("clients")
+      .select("id", { count: "exact", head: true })
+      .eq("user_id", user.id),
+    supabase
+      .from("barbecues")
+      .select("id, title, event_date, adults, children, estimated_cost, budget, status, created_at")
+      .eq("user_id", user.id)
+      .order("created_at", { ascending: false })
+      .limit(5),
+    supabase
+      .from("events")
+      .select("id, title, event_date, guests, revenue, status")
+      .eq("user_id", user.id)
+      .order("event_date", { ascending: true }),
+  ]);
+
+  const events = eventsResult.data || [];
+  const eventIds = events.map((event) => event.id);
+  let totalCosts = 0;
+
+  if (eventIds.length > 0) {
+    const { data: costs } = await supabase
+      .from("event_costs")
+      .select("amount")
+      .in("event_id", eventIds);
+
+    totalCosts = (costs || []).reduce((sum, cost) => sum + Number(cost.amount || 0), 0);
+  }
+
+  const totalRevenue = events.reduce((sum, event) => sum + Number(event.revenue || 0), 0);
+  const profit = totalRevenue - totalCosts;
+  const margin = totalRevenue > 0 ? Math.round((profit / totalRevenue) * 100) : 0;
+  const recentBarbecues = recentBarbecuesResult.data || [];
   const displayName = profile?.full_name?.trim() || "Churrasqueiro";
+  const accountLabel =
+    profile?.account_type === "professional"
+      ? "CONTA PROFISSIONAL"
+      : profile?.account_type === "supplier"
+        ? "FORNECEDOR"
+        : "CONTA PESSOAL";
+
+  const stats = [
+    ["Churrascos salvos", String(barbecueCountResult.count || 0), "Planejamentos na sua conta"],
+    ["Receita dos eventos", money(totalRevenue), events.length + " eventos cadastrados"],
+    ["Lucro dos eventos", money(profit), margin + "% de margem"],
+    ["Clientes", String(clientCountResult.count || 0), "Base de clientes"],
+  ];
 
   return (
     <main className="app-page">
@@ -66,7 +126,7 @@ export default async function DashboardPage() {
           <a href="#">↗ <span>Financeiro</span></a>
         </nav>
         <div className="sidebar-footer">
-          <small>{profile?.account_type === "professional" ? "CONTA PROFISSIONAL" : "BRASA PRO"}</small>
+          <small>{accountLabel}</small>
           <b>{user.email}</b>
           <LogoutButton />
         </div>
@@ -77,7 +137,7 @@ export default async function DashboardPage() {
           <div>
             <span className="eyebrow">VISÃO GERAL</span>
             <h1>Olá, {displayName}. 🔥</h1>
-            <p>Acompanhe eventos, custos e lucro em um só lugar.</p>
+            <p>Seus números abaixo agora vêm da sua conta no Brasa Pro.</p>
           </div>
           <div className="app-header-actions">
             <Link href="/planejar" className="primary-button compact">+ Novo churrasco</Link>
@@ -99,51 +159,90 @@ export default async function DashboardPage() {
           <article className="dashboard-panel panel-wide">
             <div className="panel-heading">
               <div>
-                <small>PRÓXIMOS EVENTOS</small>
-                <h2>Agenda</h2>
+                <small>PLANEJAMENTOS REAIS</small>
+                <h2>Meus churrascos</h2>
               </div>
-              <button className="ghost-button">Ver todos</button>
+              <Link href="/planejar" className="ghost-button">+ Criar</Link>
             </div>
-            <div className="event-list">
-              {events.map(([date,name,people,status]) => (
-                <div className="event-row" key={name}>
-                  <b className="event-date">{date}</b>
-                  <div><strong>{name}</strong><span>{people}</span></div>
-                  <span className={"status-pill " + status.toLowerCase()}>{status}</span>
-                  <button>→</button>
-                </div>
-              ))}
-            </div>
+
+            {recentBarbecues.length === 0 ? (
+              <div className="dashboard-empty">
+                <span>🔥</span>
+                <h3>Seu primeiro churrasco começa aqui.</h3>
+                <p>Crie um planejamento e ele aparecerá automaticamente neste dashboard.</p>
+                <Link href="/planejar" className="primary-button">Planejar agora →</Link>
+              </div>
+            ) : (
+              <div className="event-list">
+                {recentBarbecues.map((barbecue) => {
+                  const guests = Number(barbecue.adults || 0) + Number(barbecue.children || 0);
+                  return (
+                    <Link className="event-row barbecue-row-link" href={"/churrascos/" + barbecue.id} key={barbecue.id}>
+                      <b className="event-date">{shortDate(barbecue.event_date)}</b>
+                      <div>
+                        <strong>{barbecue.title}</strong>
+                        <span>{guests} pessoas · estimado em {money(Number(barbecue.estimated_cost || 0))}</span>
+                      </div>
+                      <span className="status-pill confirmado">Salvo</span>
+                      <span className="event-arrow">→</span>
+                    </Link>
+                  );
+                })}
+              </div>
+            )}
           </article>
 
           <article className="dashboard-panel">
             <div className="panel-heading">
-              <div><small>RESULTADO DO MÊS</small><h2>Financeiro</h2></div>
+              <div><small>RESULTADO REAL</small><h2>Financeiro</h2></div>
             </div>
-            <div className="finance-ring"><span><b>42%</b><small>margem</small></span></div>
+            <div className="finance-ring" style={{
+              background: "radial-gradient(circle, #11161b 54%, transparent 56%), conic-gradient(var(--green) " + Math.max(0, Math.min(100, margin)) + "%, #26302b 0)"
+            }}>
+              <span><b>{margin}%</b><small>margem</small></span>
+            </div>
             <div className="finance-mini">
-              <div><span>Receita</span><b>R$ 18.450</b></div>
-              <div><span>Custos</span><b>R$ 10.630</b></div>
-              <div><span>Lucro</span><b className="positive">R$ 7.820</b></div>
+              <div><span>Receita</span><b>{money(totalRevenue)}</b></div>
+              <div><span>Custos</span><b>{money(totalCosts)}</b></div>
+              <div><span>Lucro</span><b className={profit >= 0 ? "positive" : ""}>{money(profit)}</b></div>
             </div>
+            {events.length === 0 && (
+              <p className="panel-note">Nenhum evento profissional cadastrado ainda.</p>
+            )}
           </article>
 
           <article className="dashboard-panel ai-dashboard-panel">
             <span className="eyebrow">✦ IA BRASA</span>
-            <h2>Planeje o próximo evento</h2>
-            <p>Informe convidados, orçamento e estilo. O Brasa Pro prepara as quantidades e o custo inicial.</p>
+            <h2>Planeje o próximo churrasco</h2>
+            <p>O planejador já salva convidados, orçamento, quantidades e lista de compras na sua conta.</p>
             <Link href="/planejar" className="primary-button">Começar planejamento →</Link>
           </article>
 
           <article className="dashboard-panel">
             <div className="panel-heading">
-              <div><small>CLIENTES</small><h2>Recentes</h2></div>
+              <div><small>PRÓXIMA ÁREA PROFISSIONAL</small><h2>Eventos</h2></div>
             </div>
-            <div className="client-list">
-              <div><span>MF</span><p><b>Marcos Ferreira</b><small>2 eventos</small></p><em>R$ 5.800</em></div>
-              <div><span>AS</span><p><b>Ana Souza</b><small>1 evento</small></p><em>R$ 2.900</em></div>
-              <div><span>RC</span><p><b>Rafael Costa</b><small>3 eventos</small></p><em>R$ 8.400</em></div>
-            </div>
+
+            {events.length === 0 ? (
+              <div className="compact-empty">
+                <span>📅</span>
+                <b>Sem eventos ainda</b>
+                <p>Na próxima etapa vamos cadastrar clientes, eventos, custos e orçamentos.</p>
+              </div>
+            ) : (
+              <div className="client-list">
+                {events.slice(0, 3).map((event) => (
+                  <div key={event.id}>
+                    <span>{shortDate(event.event_date).slice(0, 2)}</span>
+                    <p>
+                      <b>{event.title}</b>
+                      <small>{event.guests} convidados · {event.status}</small>
+                    </p>
+                    <em>{money(Number(event.revenue || 0))}</em>
+                  </div>
+                ))}
+              </div>
+            )}
           </article>
         </div>
       </section>
