@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
 import EventCostForm from "@/components/EventCostForm";
+import QuoteForm from "@/components/QuoteForm";
 import { createClient } from "@/lib/supabase/server";
 
 export const dynamic = "force-dynamic";
@@ -50,7 +51,7 @@ export default async function EventDetailPage({ params }: PageProps) {
 
   if (!event) notFound();
 
-  const [{ data: costs }, clientResult] = await Promise.all([
+  const [{ data: costs }, clientResult, quoteResult] = await Promise.all([
     supabase
       .from("event_costs")
       .select("id, category, description, amount, created_at")
@@ -64,9 +65,18 @@ export default async function EventDetailPage({ params }: PageProps) {
           .eq("user_id", user.id)
           .maybeSingle()
       : Promise.resolve({ data: null }),
+    supabase
+      .from("quotes")
+      .select("id, margin_percent, valid_until, price_total, status")
+      .eq("event_id", id)
+      .eq("user_id", user.id)
+      .order("created_at", { ascending: false })
+      .limit(1)
+      .maybeSingle(),
   ]);
 
   const client = clientResult.data;
+  const quote = quoteResult.data;
   const totalCosts = (costs || []).reduce((sum, cost) => sum + Number(cost.amount || 0), 0);
   const revenue = Number(event.revenue || 0);
   const profit = revenue - totalCosts;
@@ -155,6 +165,33 @@ export default async function EventDetailPage({ params }: PageProps) {
             <EventCostForm eventId={event.id} />
           </article>
         </div>
+
+        <article className="detail-panel quote-workspace">
+          <div className="panel-heading">
+            <div>
+              <small>ORÇAMENTO PROFISSIONAL</small>
+              <h2>Quanto cobrar?</h2>
+            </div>
+            {quote && (
+              <Link className="ghost-button" href={"/orcamentos/" + quote.id}>
+                Ver orçamento
+              </Link>
+            )}
+          </div>
+
+          <p className="quote-intro">
+            O Brasa Pro usa os custos lançados e sua margem desejada para sugerir o preço de venda.
+          </p>
+
+          <QuoteForm
+            eventId={event.id}
+            quoteId={quote?.id || null}
+            totalCosts={totalCosts}
+            currentRevenue={revenue}
+            initialMargin={quote ? Number(quote.margin_percent) : 35}
+            initialValidUntil={quote?.valid_until || null}
+          />
+        </article>
 
         <div className="event-summary-grid">
           <article className="detail-panel">
