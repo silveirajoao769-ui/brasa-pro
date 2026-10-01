@@ -119,7 +119,7 @@ export default async function DashboardPage() {
           <Link className="active" href="/dashboard">⌂ <span>Dashboard</span></Link>
           <Link href="/planejar">✦ <span>Planejamento</span></Link>
           <Link href="/planejar">▦ <span>Calculadora</span></Link>
-          <a href="#">☷ <span>Receitas</span></a>
+          <Link href="/receitas">☷ <span>Receitas</span></Link>
           <a href="#">🛒 <span>Compras</span></a>
           <Link href="/clientes">♙ <span>Clientes</span></Link>
           <Link href="/eventos">□ <span>Eventos</span></Link>
