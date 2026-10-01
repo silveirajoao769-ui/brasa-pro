@@ -38,7 +38,7 @@ export default async function PlanPage() {
 
   const plan = subscription?.plan || "free";
   const isPro = plan === "pro" && subscription?.status === "active";
-  const billingReady = Boolean(process.env.MERCADO_PAGO_ACCESS_TOKEN);
+  const checkoutUrl = process.env.NEXT_PUBLIC_CAKTO_CHECKOUT_URL || null;
 
   return (
     <main className="plan-page">
@@ -100,7 +100,7 @@ export default async function PlanPage() {
             {isPro ? (
               <div className="plan-current-button pro">Plano Pro ativo</div>
             ) : (
-              <UpgradeButton enabled={billingReady} />
+              <UpgradeButton checkoutUrl={checkoutUrl} accountEmail={user.email || ""} />
             )}
           </article>
         </div>
