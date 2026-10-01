@@ -121,9 +121,9 @@ export default async function DashboardPage() {
           <Link href="/planejar">▦ <span>Calculadora</span></Link>
           <a href="#">☷ <span>Receitas</span></a>
           <a href="#">🛒 <span>Compras</span></a>
-          <a href="#">♙ <span>Clientes</span></a>
-          <a href="#">□ <span>Eventos</span></a>
-          <a href="#">↗ <span>Financeiro</span></a>
+          <Link href="/clientes">♙ <span>Clientes</span></Link>
+          <Link href="/eventos">□ <span>Eventos</span></Link>
+          <Link href="/eventos">↗ <span>Financeiro</span></Link>
         </nav>
         <div className="sidebar-footer">
           <small>{accountLabel}</small>
