@@ -1,3 +1,4 @@
+import Link from "next/link";
 import QuickPlanner from "@/components/QuickPlanner";
 
 const personas = [
@@ -53,8 +54,8 @@ export default function Home() {
           </div>
 
           <div className="nav-actions">
-            <button className="ghost-button">Entrar</button>
-            <a className="primary-button compact" href="#planejamento">Comece agora</a>
+            <Link className="ghost-button" href="/dashboard">Entrar</Link>
+            <Link className="primary-button compact" href="/planejar">Comece agora</Link>
           </div>
         </nav>
 
@@ -79,7 +80,7 @@ export default function Home() {
                   </div>
                   <h3>{persona.title}</h3>
                   <p>{persona.description}</p>
-                  <button aria-label={"Abrir " + persona.title}>→</button>
+                  <Link href={index === 0 ? "/planejar" : index === 1 ? "/dashboard" : "#planos"} aria-label={"Abrir " + persona.title}>→</Link>
                 </article>
               ))}
             </div>
@@ -281,7 +282,7 @@ export default function Home() {
                 <li>✓ Algumas receitas</li>
                 <li>✓ Lista de compras</li>
               </ul>
-              <button className="ghost-button wide">Começar grátis</button>
+              <Link href="/planejar" className="ghost-button wide">Começar grátis</Link>
             </article>
 
             <article className="price-card featured">
@@ -296,7 +297,7 @@ export default function Home() {
                 <li>✓ Custos, margem e lucro</li>
                 <li>✓ Recursos profissionais</li>
               </ul>
-              <button className="primary-button wide">Quero ser Pro →</button>
+              <Link href="/dashboard" className="primary-button wide">Quero ser Pro →</Link>
             </article>
           </div>
         </div>
