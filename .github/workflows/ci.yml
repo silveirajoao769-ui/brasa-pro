@@ -17,10 +17,12 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: 22
-          cache: npm
 
       - name: Install dependencies
         run: npm install
 
       - name: Build
+        env:
+          NEXT_PUBLIC_SUPABASE_URL: https://pbstzmnmldqgwdqwocey.supabase.co
+          NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY: sb_publishable_9ADVhGx85cFd6vEsLmm6pA_v1ybeZoy
         run: npm run build
