@@ -3,21 +3,19 @@
 import { useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
+import {
+  calculateBarbecuePlan,
+  CUT_CATALOG,
+  PlannerStyle,
+  STYLE_PRESETS,
+} from "@/lib/planner";
 
-type Plan = {
-  people: number;
-  meat: number;
-  drinks: number;
-  charcoal: number;
-  ice: number;
-  estimate: number;
-};
-
-const styleMap = {
+const styleMap: Record<PlannerStyle, "economic" | "balanced" | "premium" | "custom"> = {
   economico: "economic",
   equilibrado: "balanced",
   premium: "premium",
-} as const;
+  personalizado: "custom",
+};
 
 export default function QuickPlanner() {
   const router = useRouter();
@@ -27,41 +25,54 @@ export default function QuickPlanner() {
   const [children, setChildren] = useState(5);
   const [duration, setDuration] = useState(4);
   const [budget, setBudget] = useState(900);
-  const [style, setStyle] = useState<keyof typeof styleMap>("equilibrado");
+  const [style, setStyle] = useState<PlannerStyle>("equilibrado");
+  const [selectedCuts, setSelectedCuts] = useState<string[]>(STYLE_PRESETS.equilibrado);
   const [saving, setSaving] = useState(false);
   const [message, setMessage] = useState("");
 
-  const plan = useMemo<Plan>(() => {
-    const people = adults + children;
-    const durationFactor = Math.min(1.28, Math.max(0.9, 1 + (duration - 4) * 0.04));
-    const meat = (adults * 0.42 + children * 0.22) * durationFactor;
-    const drinks = Math.ceil((adults * 2.4 + children * 1.4) * durationFactor);
-    const charcoal = Math.max(4, Math.ceil(meat * 0.7));
-    const ice = Math.max(5, Math.ceil((adults + children * 0.6) * 0.55));
-
-    const pricePerEquivalentGuest =
-      style === "economico" ? 25 : style === "premium" ? 49 : 34;
-
-    const equivalentGuests = adults + children * 0.55;
-    const estimate = Math.round(equivalentGuests * pricePerEquivalentGuest * durationFactor);
-
-    return {
-      people,
-      meat: Number(meat.toFixed(1)),
-      drinks,
-      charcoal,
-      ice,
-      estimate,
-    };
-  }, [adults, children, duration, style]);
+  const plan = useMemo(
+    () =>
+      calculateBarbecuePlan({
+        adults,
+        children,
+        duration,
+        selectedCuts,
+      }),
+    [adults, children, duration, selectedCuts],
+  );
 
   const diff = budget - plan.estimate;
+
+  function changeStyle(nextStyle: PlannerStyle) {
+    setStyle(nextStyle);
+
+    if (nextStyle !== "personalizado") {
+      setSelectedCuts(STYLE_PRESETS[nextStyle]);
+    }
+  }
+
+  function toggleCut(cutId: string) {
+    setStyle("personalizado");
+    setSelectedCuts((currentCuts) => {
+      if (currentCuts.includes(cutId)) {
+        if (currentCuts.length === 1) return currentCuts;
+        return currentCuts.filter((id) => id !== cutId);
+      }
+
+      return [...currentCuts, cutId];
+    });
+  }
 
   async function savePlan() {
     setMessage("");
 
     if (plan.people < 2) {
       setMessage("Informe pelo menos 2 pessoas.");
+      return;
+    }
+
+    if (selectedCuts.length === 0) {
+      setMessage("Escolha pelo menos um corte.");
       return;
     }
 
@@ -101,40 +112,19 @@ export default function QuickPlanner() {
 
       barbecueId = barbecue.id;
 
-      const { error: itemError } = await supabase.from("barbecue_items").insert([
-        {
-          barbecue_id: barbecue.id,
-          category: "Carnes",
-          name: "Carnes variadas",
-          quantity: plan.meat,
-          unit: "kg",
-          source: "calculator",
-        },
-        {
-          barbecue_id: barbecue.id,
-          category: "Bebidas",
-          name: "Bebidas variadas",
-          quantity: plan.drinks,
-          unit: "un",
-          source: "calculator",
-        },
-        {
-          barbecue_id: barbecue.id,
-          category: "Insumos",
-          name: "Carvão",
-          quantity: plan.charcoal,
-          unit: "kg",
-          source: "calculator",
-        },
-        {
-          barbecue_id: barbecue.id,
-          category: "Insumos",
-          name: "Gelo",
-          quantity: plan.ice,
-          unit: "kg",
-          source: "calculator",
-        },
-      ]);
+      const barbecueItems = plan.items.map((item) => ({
+        barbecue_id: barbecue.id,
+        category: item.category,
+        name: item.name,
+        quantity: item.quantity,
+        unit: item.unit,
+        unit_price: item.unitPrice,
+        source: "calculator",
+      }));
+
+      const { error: itemError } = await supabase
+        .from("barbecue_items")
+        .insert(barbecueItems);
 
       if (itemError) throw itemError;
 
@@ -147,38 +137,22 @@ export default function QuickPlanner() {
         .select("id")
         .single();
 
-      if (listError || !shoppingList) throw listError || new Error("Falha ao criar lista de compras.");
+      if (listError || !shoppingList) {
+        throw listError || new Error("Falha ao criar lista de compras.");
+      }
 
-      const { error: shoppingError } = await supabase.from("shopping_list_items").insert([
-        {
-          shopping_list_id: shoppingList.id,
-          category: "Carnes",
-          name: "Carnes variadas",
-          quantity: plan.meat,
-          unit: "kg",
-        },
-        {
-          shopping_list_id: shoppingList.id,
-          category: "Bebidas",
-          name: "Bebidas variadas",
-          quantity: plan.drinks,
-          unit: "un",
-        },
-        {
-          shopping_list_id: shoppingList.id,
-          category: "Insumos",
-          name: "Carvão",
-          quantity: plan.charcoal,
-          unit: "kg",
-        },
-        {
-          shopping_list_id: shoppingList.id,
-          category: "Insumos",
-          name: "Gelo",
-          quantity: plan.ice,
-          unit: "kg",
-        },
-      ]);
+      const shoppingItems = plan.items.map((item) => ({
+        shopping_list_id: shoppingList.id,
+        category: item.category,
+        name: item.name,
+        quantity: item.quantity,
+        unit: item.unit,
+        estimated_price: item.estimatedPrice,
+      }));
+
+      const { error: shoppingError } = await supabase
+        .from("shopping_list_items")
+        .insert(shoppingItems);
 
       if (shoppingError) throw shoppingError;
 
@@ -200,8 +174,8 @@ export default function QuickPlanner() {
         <span className="eyebrow">🔥 PLANEJAMENTO INTELIGENTE</span>
         <h3>Monte seu churrasco em segundos</h3>
         <p>
-          Informe convidados, duração e orçamento. O Brasa Pro calcula uma primeira
-          estimativa e salva tudo na sua conta.
+          Informe convidados, duração, orçamento e cortes. O Brasa Pro transforma isso
+          em quantidades reais, lista de compras e custo estimado.
         </p>
       </div>
 
@@ -274,27 +248,73 @@ export default function QuickPlanner() {
 
         <label>
           Estilo
-          <select value={style} onChange={(e) => setStyle(e.target.value as keyof typeof styleMap)}>
+          <select value={style} onChange={(e) => changeStyle(e.target.value as PlannerStyle)}>
             <option value="economico">Econômico</option>
             <option value="equilibrado">Equilibrado</option>
             <option value="premium">Premium</option>
+            <option value="personalizado">Personalizado</option>
           </select>
         </label>
       </div>
 
+      <div className="cut-planner">
+        <div className="cut-planner-heading">
+          <div>
+            <span className="eyebrow">ESCOLHA DOS CORTES</span>
+            <h4>{style === "personalizado" ? "Seu churrasco personalizado" : "Cortes sugeridos para o estilo"}</h4>
+          </div>
+          <small>Clique em qualquer corte para personalizar.</small>
+        </div>
+
+        <div className="cut-selector">
+          {CUT_CATALOG.map((cut) => {
+            const selected = selectedCuts.includes(cut.id);
+
+            return (
+              <button
+                className={selected ? "cut-option selected" : "cut-option"}
+                key={cut.id}
+                onClick={() => toggleCut(cut.id)}
+                type="button"
+              >
+                <span>{selected ? "✓" : "+"}</span>
+                <div>
+                  <b>{cut.name}</b>
+                  <small>Referência R$ {cut.pricePerKg}/kg</small>
+                </div>
+              </button>
+            );
+          })}
+        </div>
+      </div>
+
       <div className="people-summary">
-        <span>{plan.people} convidados</span>
+        <span>{plan.people} convidados · {plan.meat.toFixed(1)} kg de carnes</span>
         <small>{adults} adultos · {children} crianças · {duration}h de evento</small>
       </div>
 
-      <div className="plan-results">
-        <div><strong>{plan.meat.toFixed(1)} kg</strong><span>Carnes</span></div>
-        <div><strong>{plan.drinks}</strong><span>Bebidas</span></div>
-        <div><strong>{plan.charcoal} kg</strong><span>Carvão</span></div>
-        <div><strong>{plan.ice} kg</strong><span>Gelo</span></div>
-        <div className="result-total">
+      <div className="planned-breakdown">
+        <div className="planned-breakdown-heading">
+          <div>
+            <span className="eyebrow">PLANO CALCULADO</span>
+            <h4>Quantidades e custo estimado</h4>
+          </div>
           <strong>R$ {plan.estimate.toLocaleString("pt-BR")}</strong>
-          <span>Custo estimado</span>
+        </div>
+
+        <div className="planned-items-grid">
+          {plan.items.map((item) => (
+            <div className="planned-item" key={item.category + item.name}>
+              <span>{item.category}</span>
+              <div>
+                <b>{item.name}</b>
+                <small>
+                  {item.quantity.toLocaleString("pt-BR")} {item.unit} · R$ {item.unitPrice.toLocaleString("pt-BR")}/{item.unit}
+                </small>
+              </div>
+              <strong>R$ {item.estimatedPrice.toLocaleString("pt-BR", { minimumFractionDigits: 2 })}</strong>
+            </div>
+          ))}
         </div>
       </div>
 
@@ -312,7 +332,7 @@ export default function QuickPlanner() {
         {saving ? "Salvando planejamento..." : "Salvar planejamento e criar lista →"}
       </button>
       <small className="prototype-note">
-        Estimativa inicial do MVP. Cortes, bebidas e preços específicos entram nas próximas etapas.
+        Os preços usados agora são referências do MVP e depois poderão vir de açougues e fornecedores parceiros.
       </small>
     </div>
   );
