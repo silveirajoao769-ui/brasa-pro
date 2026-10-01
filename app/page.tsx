@@ -297,7 +297,7 @@ export default function Home() {
                 <li>✓ Custos, margem e lucro</li>
                 <li>✓ Recursos profissionais</li>
               </ul>
-              <Link href="/cadastro" className="primary-button wide">Quero ser Pro →</Link>
+              <Link href="/plano" className="primary-button wide">Quero ser Pro →</Link>
             </article>
           </div>
         </div>
