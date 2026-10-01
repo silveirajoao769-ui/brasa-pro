@@ -2,44 +2,36 @@
 
 import { useState } from "react";
 
-export default function UpgradeButton({ enabled }: { enabled: boolean }) {
-  const [loading, setLoading] = useState(false);
+export default function UpgradeButton({
+  checkoutUrl,
+  accountEmail,
+}: {
+  checkoutUrl: string | null;
+  accountEmail: string;
+}) {
   const [message, setMessage] = useState("");
 
-  async function upgrade() {
-    if (!enabled) {
-      setMessage("O checkout do Mercado Pago ainda está sendo configurado.");
+  function upgrade() {
+    setMessage("");
+
+    if (!checkoutUrl) {
+      setMessage("O checkout da Cakto ainda está sendo configurado.");
       return;
     }
 
-    setLoading(true);
-    setMessage("");
-
-    try {
-      const response = await fetch("/api/billing/mercadopago/checkout", {
-        method: "POST",
-      });
-
-      const data = await response.json();
-
-      if (!response.ok || !data.initPoint) {
-        setMessage(data.error || "Não foi possível iniciar o pagamento.");
-        setLoading(false);
-        return;
-      }
-
-      window.location.href = data.initPoint;
-    } catch {
-      setMessage("Não foi possível iniciar o checkout agora.");
-      setLoading(false);
-    }
+    window.location.href = checkoutUrl;
   }
 
   return (
     <div className="upgrade-action">
-      <button className="primary-button wide" type="button" disabled={loading} onClick={upgrade}>
-        {loading ? "Abrindo Mercado Pago..." : "Assinar Brasa Pro →"}
+      <button className="primary-button wide" type="button" onClick={upgrade}>
+        Assinar Brasa Pro →
       </button>
+
+      <small>
+        Use na Cakto o mesmo e-mail da sua conta Brasa Pro: <b>{accountEmail}</b>
+      </small>
+
       {message && <small>{message}</small>}
     </div>
   );
