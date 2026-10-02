@@ -2,6 +2,8 @@ import Link from "next/link";
 import { redirect } from "next/navigation";
 import SupplierForm from "@/components/SupplierForm";
 import SupplierProductForm from "@/components/SupplierProductForm";
+import SupplierEditor from "@/components/SupplierEditor";
+import SupplierProductEditor from "@/components/SupplierProductEditor";
 import { createClient } from "@/lib/supabase/server";
 import { requirePro } from "@/lib/subscription";
 
@@ -28,7 +30,7 @@ export default async function SuppliersPage() {
   const [{ data: suppliers }, { data: products }] = await Promise.all([
     supabase
       .from("suppliers")
-      .select("id, name, contact_name, phone, email, city, state, active, created_at")
+      .select("id, name, contact_name, phone, email, city, state, active, notes, created_at")
       .eq("user_id", user.id)
       .order("created_at", { ascending: false }),
     supabase
@@ -144,6 +146,7 @@ export default async function SuppliersPage() {
                       <small>{supplier.phone || supplier.email || "Sem contato informado"}</small>
                     </div>
                     <em>{productRows.filter((product) => product.supplier_id === supplier.id).length} preços</em>
+                    <SupplierEditor supplier={supplier} />
                   </div>
                 ))}
               </div>
@@ -185,16 +188,17 @@ export default async function SuppliersPage() {
                         {saving > 0 && <em>Economia de até {money(saving)}/{cheapest.unit}</em>}
                       </div>
 
-                      {comparison.entries.length > 1 && (
-                        <div className="price-comparison-options">
-                          {comparison.entries.slice(0, 4).map((entry) => (
-                            <div key={entry.id}>
+                      <div className="price-comparison-options">
+                        {comparison.entries.slice(0, 6).map((entry) => (
+                          <div className="price-comparison-option-managed" key={entry.id}>
+                            <div>
                               <span>{supplierMap.get(entry.supplier_id) || "Fornecedor"}</span>
                               <b>{money(Number(entry.price))}/{entry.unit}</b>
                             </div>
-                          ))}
-                        </div>
-                      )}
+                            <SupplierProductEditor product={entry} />
+                          </div>
+                        ))}
+                      </div>
                     </div>
                   );
                 })}
