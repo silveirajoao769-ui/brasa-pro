@@ -3,6 +3,7 @@ import { redirect } from "next/navigation";
 import PartnerProfileForm from "@/components/PartnerProfileForm";
 import PartnerProductForm from "@/components/PartnerProductForm";
 import { createClient } from "@/lib/supabase/server";
+import { requirePro } from "@/lib/subscription";
 
 export const dynamic = "force-dynamic";
 
@@ -18,6 +19,7 @@ export default async function SupplierPortalPage() {
   const { data: { user } } = await supabase.auth.getUser();
 
   if (!user) redirect("/login");
+  await requirePro(supabase, user.id, "Portal do fornecedor");
 
   const [{ data: profile }, { data: products }, { data: orders }] = await Promise.all([
     supabase
