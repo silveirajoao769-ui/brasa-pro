@@ -65,9 +65,23 @@ assert(aiApi.includes('process.env.OPENAI_API_KEY'), "chave OpenAI fica somente 
 assert(!aiApi.includes("NEXT_PUBLIC_OPENAI"), "chave OpenAI não é exposta ao navegador");
 
 const aiPage = read("app/ia-brasa/page.tsx");
-assert(aiPage.includes('redirect("/dashboard")'), "interface da IA continua oculta até a etapa final");
+assert(aiPage.includes("AIPlanner"), "central da IA Brasa está ativa");
+assert(aiPage.includes("AIBusinessAdvisor"), "IA Brasa possui análise profissional contextual");
+
+const advisorApi = read("app/api/ai/advisor/route.ts");
+assert(advisorApi.includes("https://api.openai.com/v1/responses"), "advisor profissional usa OpenAI Responses API");
+assert(advisorApi.includes("isActivePro"), "advisor profissional exige plano Pro");
+assert(!advisorApi.includes("NEXT_PUBLIC_OPENAI"), "advisor não expõe chave OpenAI ao navegador");
+
+assert(exists("app/suporte/page.tsx"), "central de suporte interno existe");
+assert(exists("app/suporte/[id]/page.tsx"), "histórico de chamado existe");
+
+const authForm = read("components/AuthForm.tsx");
+assert(authForm.includes("isValidTaxId"), "cadastro profissional valida CPF/CNPJ");
+assert(authForm.includes("Em breve"), "cadastro sinaliza fornecedor como em breve");
 
 const envExample = read(".env.example");
+assert(envExample.includes("MARKETPLACE_ENABLED=false"), "marketplace fica desativado no lançamento");
 assert(!/sb_secret_[A-Za-z0-9_-]+/.test(envExample), ".env.example não contém chave secreta Supabase");
 assert(!/service_role\s*=\s*[^<\s]/i.test(envExample), ".env.example não contém service role real");
 
