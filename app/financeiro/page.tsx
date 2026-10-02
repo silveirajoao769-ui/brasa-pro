@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
+import { requirePro } from "@/lib/subscription";
 
 export const dynamic = "force-dynamic";
 
@@ -16,6 +17,7 @@ export default async function FinancePage() {
   const { data: { user } } = await supabase.auth.getUser();
 
   if (!user) redirect("/login");
+  await requirePro(supabase, user.id, "Financeiro profissional");
 
   const [{ data: events }, { data: quotes }] = await Promise.all([
     supabase
