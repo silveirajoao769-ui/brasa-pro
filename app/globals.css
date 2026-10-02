@@ -672,16 +672,64 @@ footer { border-top: 1px solid var(--line); padding: 30px 0; }
   .app-page { display: block; }
   .app-sidebar {
     position: fixed; z-index: 50; left: 0; right: 0; bottom: 0; top: auto;
-    width: 100%; height: 66px; padding: 8px 10px;
+    width: 100%; height: calc(72px + env(safe-area-inset-bottom));
+    padding: 7px 8px max(7px, env(safe-area-inset-bottom));
     border-right: 0; border-top: 1px solid var(--line);
+    overflow: hidden;
   }
   .app-logo, .sidebar-footer { display: none; }
-  .app-sidebar nav { display: grid; grid-template-columns: repeat(5, 1fr); gap: 3px; }
-  .app-sidebar nav a { min-height: 48px; }
-  .app-sidebar nav a:nth-child(n+6) { display: none; }
-  .app-content { padding: 22px 14px 88px; }
+  .app-sidebar nav {
+    display: flex;
+    gap: 4px;
+    overflow-x: auto;
+    overflow-y: hidden;
+    overscroll-behavior-x: contain;
+    scroll-snap-type: x proximity;
+    scrollbar-width: none;
+    -webkit-overflow-scrolling: touch;
+  }
+  .app-sidebar nav::-webkit-scrollbar { display: none; }
+  .app-sidebar nav a,
+  .app-sidebar nav a:nth-child(n+6) {
+    position: relative;
+    flex: 0 0 72px;
+    min-height: 54px;
+    padding: 5px 4px;
+    scroll-snap-align: start;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    gap: 3px;
+    font-size: 15px;
+  }
+  .app-sidebar nav a span {
+    display: block;
+    max-width: 68px;
+    color: #7f8891;
+    font-size: 7px;
+    font-weight: 800;
+    line-height: 1.05;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+  .app-sidebar nav a.active span,
+  .app-sidebar nav a:hover span { color: #fff; }
+  .app-sidebar .nav-pro-tag {
+    position: absolute;
+    top: 2px;
+    right: 3px;
+    margin: 0;
+    padding: 2px 4px;
+    font-size: 5px;
+  }
+  .app-content { padding: 22px 14px calc(96px + env(safe-area-inset-bottom)); }
   .app-header { flex-direction: column; }
   .app-header h1 { font-size: 29px; }
+  .app-header-actions {
+    width: 100%;
+    justify-content: space-between;
+  }
   .app-stats { grid-template-columns: 1fr 1fr; gap: 8px; }
   .app-stats article { padding: 13px; }
   .app-stats strong { font-size: 19px; }
@@ -7240,5 +7288,105 @@ footer { border-top: 1px solid var(--line); padding: 30px 0; }
   }
   .onboarding-choice {
     min-height: 116px;
+  }
+}
+
+
+/* Global mobile QA fixes */
+@media (max-width: 720px) {
+  .workspace-topbar,
+  .detail-topbar {
+    min-height: 0;
+    padding-top: 14px;
+    padding-bottom: 14px;
+    align-items: flex-start;
+    gap: 12px;
+  }
+  .workspace-topbar,
+  .detail-topbar,
+  .workspace-heading,
+  .detail-heading {
+    flex-direction: column;
+  }
+  .workspace-topbar .detail-actions,
+  .detail-topbar .detail-actions,
+  .detail-heading > .detail-actions {
+    width: 100%;
+    max-width: 100%;
+    overflow-x: auto;
+    flex-wrap: nowrap;
+    padding-bottom: 3px;
+    scrollbar-width: none;
+    -webkit-overflow-scrolling: touch;
+  }
+  .workspace-topbar .detail-actions::-webkit-scrollbar,
+  .detail-topbar .detail-actions::-webkit-scrollbar,
+  .detail-heading > .detail-actions::-webkit-scrollbar {
+    display: none;
+  }
+  .workspace-topbar .detail-actions > *,
+  .detail-topbar .detail-actions > *,
+  .detail-heading > .detail-actions > * {
+    flex: 0 0 auto;
+  }
+  .workspace-content,
+  .detail-content {
+    padding-top: 34px;
+    padding-bottom: 76px;
+  }
+  .workspace-heading,
+  .detail-heading {
+    align-items: flex-start;
+    gap: 14px;
+    margin-bottom: 22px;
+  }
+  .workspace-heading h1,
+  .detail-heading h1 {
+    font-size: clamp(38px, 12vw, 48px);
+    letter-spacing: -2px;
+  }
+  .workspace-form-grid,
+  .detail-grid {
+    grid-template-columns: 1fr;
+  }
+  .form-span-2 {
+    grid-column: auto;
+  }
+  .workspace-panel,
+  .detail-panel,
+  .dashboard-panel {
+    padding: 16px;
+    border-radius: 15px;
+  }
+  .panel-heading {
+    align-items: flex-start;
+    flex-wrap: wrap;
+  }
+  .detail-metrics,
+  .event-finance-hero,
+  .budget-summary {
+    grid-template-columns: 1fr 1fr;
+  }
+  .public-proposal-card {
+    margin-left: 10px;
+    margin-right: 10px;
+  }
+  .public-proposal-hero,
+  .public-proposal-summary,
+  .public-proposal-info {
+    padding-left: 18px;
+    padding-right: 18px;
+  }
+}
+
+@media (max-width: 480px) {
+  .detail-metrics,
+  .event-finance-hero,
+  .budget-summary,
+  .app-stats {
+    grid-template-columns: 1fr;
+  }
+  .app-header-actions .primary-button {
+    flex: 1;
   }
 }
