@@ -7,6 +7,7 @@ import EventPaymentActions from "@/components/EventPaymentActions";
 import EventTeamAssignmentForm from "@/components/EventTeamAssignmentForm";
 import EventTeamStatusSelect from "@/components/EventTeamStatusSelect";
 import QuoteForm from "@/components/QuoteForm";
+import PackageQuoteForm from "@/components/PackageQuoteForm";
 import { createClient } from "@/lib/supabase/server";
 import { requirePro } from "@/lib/subscription";
 
@@ -58,7 +59,7 @@ export default async function EventDetailPage({ params }: PageProps) {
 
   if (!event) notFound();
 
-  const [{ data: costs }, clientResult, quoteResult, { data: tasks }, { data: payments }, { data: teamMembers }, { data: teamAssignments }] = await Promise.all([
+  const [{ data: costs }, clientResult, quoteResult, { data: tasks }, { data: payments }, { data: teamMembers }, { data: teamAssignments }, { data: servicePackages }] = await Promise.all([
     supabase
       .from("event_costs")
       .select("id, category, description, amount, created_at")
@@ -106,6 +107,12 @@ export default async function EventDetailPage({ params }: PageProps) {
       .eq("event_id", id)
       .eq("user_id", user.id)
       .order("created_at", { ascending: true }),
+    supabase
+      .from("service_packages")
+      .select("id, name, description, price_per_person, min_guests")
+      .eq("user_id", user.id)
+      .eq("active", true)
+      .order("price_per_person", { ascending: true }),
   ]);
 
   const client = clientResult.data;
@@ -509,18 +516,55 @@ export default async function EventDetailPage({ params }: PageProps) {
             )}
           </div>
 
-          <p className="quote-intro">
-            O Brasa Pro usa os custos lançados e sua margem desejada para sugerir o preço de venda.
-          </p>
+          <div className="quote-method-grid">
+            <section className="quote-method-card package-method-card">
+              <div className="quote-method-heading">
+                <span>01</span>
+                <div>
+                  <small>PACOTE PRONTO</small>
+                  <h3>Vender por pessoa</h3>
+                </div>
+                <Link href="/pacotes" className="ghost-button compact">Pacotes</Link>
+              </div>
+              <p>
+                Use um cardápio pronto. O preço total é calculado pelo valor por pessoa e mínimo do pacote.
+              </p>
+              <PackageQuoteForm
+                eventId={event.id}
+                guests={Number(event.guests || 0)}
+                totalCosts={totalCosts}
+                quoteId={quote?.id || null}
+                packages={(servicePackages || []).map((item) => ({
+                  id: item.id,
+                  name: item.name,
+                  description: item.description,
+                  price_per_person: Number(item.price_per_person || 0),
+                  min_guests: Number(item.min_guests || 1),
+                }))}
+              />
+            </section>
 
-          <QuoteForm
-            eventId={event.id}
-            quoteId={quote?.id || null}
-            totalCosts={totalCosts}
-            currentRevenue={revenue}
-            initialMargin={quote ? Number(quote.margin_percent) : 35}
-            initialValidUntil={quote?.valid_until || null}
-          />
+            <section className="quote-method-card">
+              <div className="quote-method-heading">
+                <span>02</span>
+                <div>
+                  <small>MARGEM DE LUCRO</small>
+                  <h3>Calcular pelos custos</h3>
+                </div>
+              </div>
+              <p>
+                O Brasa Pro usa os custos lançados e sua margem desejada para sugerir o preço de venda.
+              </p>
+              <QuoteForm
+                eventId={event.id}
+                quoteId={quote?.id || null}
+                totalCosts={totalCosts}
+                currentRevenue={revenue}
+                initialMargin={quote ? Number(quote.margin_percent) : 35}
+                initialValidUntil={quote?.valid_until || null}
+              />
+            </section>
+          </div>
         </article>
 
         <div className="event-summary-grid">
