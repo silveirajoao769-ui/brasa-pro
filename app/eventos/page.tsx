@@ -61,6 +61,7 @@ export default async function EventsPage() {
           <span><b>Brasa <i>Pro</i></b><small>EVENTOS</small></span>
         </Link>
         <div className="detail-actions">
+          <Link href="/pacotes" className="ghost-button">Pacotes</Link>
           <Link href="/agenda" className="ghost-button">Agenda</Link>
           <Link href="/dashboard" className="ghost-button">← Dashboard</Link>
         </div>
