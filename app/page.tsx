@@ -212,12 +212,12 @@ export default function Home() {
         <div className="shell">
           <div className="section-heading split-heading">
             <div>
-              <span className="eyebrow">CALCULADORA DO MVP</span>
+              <span className="eyebrow">PLANEJAMENTO DO CHURRASCO</span>
               <h2>Descubra quanto comprar antes de acender a brasa.</h2>
             </div>
             <p>
-              Esta é a primeira função real do produto. Na próxima etapa ela recebe
-              regras detalhadas por idade, duração, cortes, bebidas e preços.
+              Informe convidados, duração e preferências para receber quantidades,
+              estimativa de custo e uma lista de compras pronta para usar.
             </p>
           </div>
           <QuickPlanner />
@@ -309,7 +309,13 @@ export default function Home() {
             <span className="brand-flame">🔥</span>
             <span><b>Brasa <i>Pro</i></b><small>PLANEJE · COMPRE · COZINHE · LUCRE</small></span>
           </div>
-          <p>Produto em construção · MVP Brasa Pro</p>
+          <div className="footer-meta">
+            <p>Brasa Pro · Planejamento e gestão profissional de churrascos.</p>
+            <div className="footer-legal-links">
+              <Link href="/termos">Termos de Uso</Link>
+              <Link href="/privacidade">Privacidade</Link>
+            </div>
+          </div>
         </div>
       </footer>
     </main>
