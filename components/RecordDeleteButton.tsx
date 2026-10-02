@@ -12,7 +12,11 @@ type TableName =
   | "event_tasks"
   | "event_payments"
   | "event_costs"
-  | "events";
+  | "events"
+  | "suppliers"
+  | "supplier_products"
+  | "inventory_items"
+  | "partner_products";
 
 export default function RecordDeleteButton({
   table,
