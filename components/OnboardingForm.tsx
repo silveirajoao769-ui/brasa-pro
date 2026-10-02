@@ -3,6 +3,7 @@
 import { FormEvent, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
+import { formatTaxId, isValidTaxId } from "@/lib/br-tax-id";
 
 type AccountType = "consumer" | "professional" | "supplier";
 
@@ -16,12 +17,14 @@ export default function OnboardingForm({
     city: string;
     state: string;
     business_name: string;
+    tax_id: string;
   };
 }) {
   const router = useRouter();
   const [accountType, setAccountType] = useState<AccountType>(initial.account_type);
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState("");
+  const [taxId, setTaxId] = useState(formatTaxId(initial.tax_id));
 
   const destination = useMemo(() => {
     if (accountType === "professional") return "/plano?feature=Operação%20profissional";
@@ -43,6 +46,12 @@ export default function OnboardingForm({
       return;
     }
 
+    if (accountType === "professional" && !isValidTaxId(taxId)) {
+      setMessage("Informe um CPF ou CNPJ válido para concluir a conta profissional.");
+      setLoading(false);
+      return;
+    }
+
     const supabase = createClient();
     const { data: { user } } = await supabase.auth.getUser();
 
@@ -60,6 +69,7 @@ export default function OnboardingForm({
         city: String(form.get("city") || "").trim() || null,
         state: String(form.get("state") || "").trim().toUpperCase() || null,
         business_name: String(form.get("businessName") || "").trim() || null,
+        tax_id: accountType === "professional" ? taxId : null,
         onboarding_completed: true,
         updated_at: new Date().toISOString(),
       })
@@ -100,12 +110,13 @@ export default function OnboardingForm({
 
         <button
           type="button"
-          className={accountType === "supplier" ? "onboarding-choice active" : "onboarding-choice"}
-          onClick={() => setAccountType("supplier")}
+          className={accountType === "supplier" ? "onboarding-choice coming-soon active" : "onboarding-choice coming-soon"}
+          disabled={accountType !== "supplier"}
+          aria-disabled={accountType !== "supplier"}
         >
           <span>🏪</span>
           <b>Sou fornecedor</b>
-          <small>Catálogo, pedidos e presença no marketplace.</small>
+          <small>Marketplace em breve</small>
         </button>
       </section>
 
@@ -140,6 +151,19 @@ export default function OnboardingForm({
             </label>
           )}
 
+          {accountType === "professional" && (
+            <label className="form-span-2">
+              CPF ou CNPJ
+              <input
+                name="taxId"
+                inputMode="numeric"
+                value={taxId}
+                onChange={(event) => setTaxId(formatTaxId(event.target.value))}
+                placeholder="Obrigatório para conta profissional"
+              />
+            </label>
+          )}
+
           <label>
             Cidade
             <input name="city" defaultValue={initial.city} placeholder="Sua cidade" />
@@ -160,7 +184,7 @@ export default function OnboardingForm({
               ? "Planejar seu primeiro churrasco"
               : accountType === "professional"
                 ? "Conhecer a operação profissional"
-                : "Conhecer o portal do fornecedor"}
+                : "Marketplace em breve"}
           </b>
         </div>
         <span>→</span>
