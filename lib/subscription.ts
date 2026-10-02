@@ -14,8 +14,11 @@ export type BrasaSubscription = {
 export function isActivePro(subscription: BrasaSubscription | null | undefined) {
   if (subscription?.plan !== "pro" || subscription?.status !== "active") return false;
 
-  if (subscription.cancel_at_period_end && subscription.current_period_end) {
-    return new Date(subscription.current_period_end).getTime() > Date.now();
+  if (
+    subscription.current_period_end &&
+    new Date(subscription.current_period_end).getTime() <= Date.now()
+  ) {
+    return false;
   }
 
   return true;
