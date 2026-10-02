@@ -1,0 +1,59 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1600 2200" preserveAspectRatio="xMidYMid slice">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#050607"/>
+      <stop offset=".45" stop-color="#0a0b0d"/>
+      <stop offset="1" stop-color="#120804"/>
+    </linearGradient>
+    <radialGradient id="ember" cx="50%" cy="50%" r="50%">
+      <stop offset="0" stop-color="#ffb13b" stop-opacity=".95"/>
+      <stop offset=".35" stop-color="#ff6a00" stop-opacity=".72"/>
+      <stop offset="1" stop-color="#ff3d00" stop-opacity="0"/>
+    </radialGradient>
+    <linearGradient id="fire" x1="0" y1="0" x2="1" y2=".3">
+      <stop offset="0" stop-color="#ff3d00" stop-opacity=".05"/>
+      <stop offset=".45" stop-color="#ff6a00" stop-opacity=".82"/>
+      <stop offset=".75" stop-color="#ffb13b" stop-opacity=".98"/>
+      <stop offset="1" stop-color="#ff4f00" stop-opacity=".05"/>
+    </linearGradient>
+    <filter id="blur40"><feGaussianBlur stdDeviation="40"/></filter>
+    <filter id="blur20"><feGaussianBlur stdDeviation="20"/></filter>
+    <filter id="glow">
+      <feGaussianBlur stdDeviation="10" result="b"/>
+      <feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+  </defs>
+
+  <rect width="1600" height="2200" fill="url(#bg)"/>
+
+  <ellipse cx="1410" cy="340" rx="430" ry="540" fill="#ff5d00" opacity=".08" filter="url(#blur40)"/>
+  <ellipse cx="230" cy="1880" rx="340" ry="520" fill="#ff4500" opacity=".08" filter="url(#blur40)"/>
+  <ellipse cx="1080" cy="1680" rx="380" ry="520" fill="#ff7a00" opacity=".05" filter="url(#blur40)"/>
+
+  <path d="M1220 -60 C1500 250 1270 520 1450 810 C1580 1020 1540 1260 1320 1490 C1110 1710 1150 1960 1510 2260"
+        fill="none" stroke="#ff5d00" stroke-width="150" opacity=".10" filter="url(#blur40)"/>
+  <path d="M1300 -100 C1460 240 1230 500 1420 790 C1590 1050 1500 1320 1260 1510 C1060 1670 1100 1960 1480 2250"
+        fill="none" stroke="url(#fire)" stroke-width="20" filter="url(#glow)"/>
+  <path d="M-120 1980 C230 1660 130 1420 350 1220 C510 1070 440 850 220 640"
+        fill="none" stroke="#ff4a00" stroke-width="120" opacity=".06" filter="url(#blur40)"/>
+  <path d="M-100 2010 C250 1680 160 1450 370 1230 C540 1040 430 840 200 650"
+        fill="none" stroke="url(#fire)" stroke-width="14" opacity=".85" filter="url(#glow)"/>
+
+  <g opacity=".9">
+    <circle cx="1280" cy="240" r="84" fill="url(#ember)" filter="url(#blur20)"/>
+    <circle cx="1480" cy="930" r="58" fill="url(#ember)" filter="url(#blur20)"/>
+    <circle cx="260" cy="1640" r="60" fill="url(#ember)" filter="url(#blur20)"/>
+    <circle cx="1060" cy="2010" r="48" fill="url(#ember)" filter="url(#blur20)"/>
+  </g>
+
+  <g fill="#ff8a14" opacity=".78">
+    <circle cx="1260" cy="170" r="5"/><circle cx="1370" cy="370" r="3.5"/>
+    <circle cx="1460" cy="720" r="5"/><circle cx="1340" cy="1180" r="4"/>
+    <circle cx="1500" cy="1450" r="6"/><circle cx="1140" cy="1820" r="4"/>
+    <circle cx="980" cy="2070" r="3.5"/><circle cx="310" cy="1550" r="5"/>
+    <circle cx="170" cy="1740" r="4"/><circle cx="420" cy="1260" r="3"/>
+    <circle cx="210" cy="920" r="4"/><circle cx="1110" cy="560" r="3"/>
+  </g>
+
+  <rect width="1600" height="2200" fill="url(#bg)" opacity=".08"/>
+</svg>
