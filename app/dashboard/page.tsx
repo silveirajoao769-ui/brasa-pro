@@ -2,6 +2,7 @@ import Link from "next/link";
 import { redirect } from "next/navigation";
 import LogoutButton from "@/components/LogoutButton";
 import { createClient } from "@/lib/supabase/server";
+import { getSubscription, isActivePro } from "@/lib/subscription";
 
 export const dynamic = "force-dynamic";
 
@@ -51,6 +52,9 @@ export default async function DashboardPage() {
 
     profile = data;
   }
+
+  const subscription = await getSubscription(supabase, user.id);
+  const isPro = isActivePro(subscription);
 
   const [
     barbecueCountResult,
@@ -106,9 +110,21 @@ export default async function DashboardPage() {
 
   const stats = [
     ["Churrascos salvos", String(barbecueCountResult.count || 0), "Planejamentos na sua conta"],
-    ["Receita dos eventos", money(totalRevenue), events.length + " eventos cadastrados"],
-    ["Lucro dos eventos", money(profit), margin + "% de margem"],
-    ["Clientes", String(clientCountResult.count || 0), "Base de clientes"],
+    [
+      "Receita dos eventos",
+      isPro ? money(totalRevenue) : "PRO",
+      isPro ? events.length + " eventos cadastrados" : "Disponível no plano Pro",
+    ],
+    [
+      "Lucro dos eventos",
+      isPro ? money(profit) : "PRO",
+      isPro ? margin + "% de margem" : "Financeiro profissional",
+    ],
+    [
+      "Clientes",
+      isPro ? String(clientCountResult.count || 0) : "PRO",
+      isPro ? "Base de clientes" : "CRM e histórico de clientes",
+    ],
   ];
 
   return (
@@ -122,16 +138,16 @@ export default async function DashboardPage() {
           <Link href="/receitas">☷ <span>Receitas</span></Link>
           <Link href="/compras">🛒 <span>Compras</span></Link>
           <Link href="/pedidos">🧾 <span>Pedidos</span></Link>
-          <Link href="/clientes">♙ <span>Clientes</span></Link>
-          <Link href="/eventos">□ <span>Eventos</span></Link>
-          <Link href="/financeiro">↗ <span>Financeiro</span></Link>
-          <Link href="/estoque">📦 <span>Estoque</span></Link>
-          <Link href="/fornecedores">🚚 <span>Fornecedores</span></Link>
-          <Link href="/fornecedor">🏪 <span>Portal fornecedor</span></Link>
+          <Link href="/clientes">♙ <span>Clientes</span>{!isPro && <small className="nav-pro-tag">PRO</small>}</Link>
+          <Link href="/eventos">□ <span>Eventos</span>{!isPro && <small className="nav-pro-tag">PRO</small>}</Link>
+          <Link href="/financeiro">↗ <span>Financeiro</span>{!isPro && <small className="nav-pro-tag">PRO</small>}</Link>
+          <Link href="/estoque">📦 <span>Estoque</span>{!isPro && <small className="nav-pro-tag">PRO</small>}</Link>
+          <Link href="/fornecedores">🚚 <span>Fornecedores</span>{!isPro && <small className="nav-pro-tag">PRO</small>}</Link>
+          <Link href="/fornecedor">🏪 <span>Portal fornecedor</span>{!isPro && <small className="nav-pro-tag">PRO</small>}</Link>
           <Link href="/plano">💳 <span>Plano</span></Link>
         </nav>
         <div className="sidebar-footer">
-          <small>{accountLabel}</small>
+          <small>{accountLabel} · {isPro ? "PLANO PRO" : "PLANO FREE"}</small>
           <b>{user.email}</b>
           <LogoutButton />
         </div>
