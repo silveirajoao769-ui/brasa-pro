@@ -140,6 +140,7 @@ export default async function DashboardPage() {
           <Link href="/pedidos">🧾 <span>Pedidos</span></Link>
           <Link href="/clientes">♙ <span>Clientes</span>{!isPro && <small className="nav-pro-tag">PRO</small>}</Link>
           <Link href="/eventos">□ <span>Eventos</span>{!isPro && <small className="nav-pro-tag">PRO</small>}</Link>
+          <Link href="/agenda">◷ <span>Agenda</span>{!isPro && <small className="nav-pro-tag">PRO</small>}</Link>
           <Link href="/financeiro">↗ <span>Financeiro</span>{!isPro && <small className="nav-pro-tag">PRO</small>}</Link>
           <Link href="/estoque">📦 <span>Estoque</span>{!isPro && <small className="nav-pro-tag">PRO</small>}</Link>
           <Link href="/fornecedores">🚚 <span>Fornecedores</span>{!isPro && <small className="nav-pro-tag">PRO</small>}</Link>
@@ -233,7 +234,7 @@ export default async function DashboardPage() {
           </article>
 
           <article className="dashboard-panel ai-dashboard-panel">
-            <span className="eyebrow">✦ IA BRASA</span>
+            <span className="eyebrow">PLANEJAMENTO RÁPIDO</span>
             <h2>Planeje o próximo churrasco</h2>
             <p>O planejador já salva convidados, orçamento, quantidades e lista de compras na sua conta.</p>
             <Link href="/planejar" className="primary-button">Começar planejamento →</Link>
@@ -241,14 +242,15 @@ export default async function DashboardPage() {
 
           <article className="dashboard-panel">
             <div className="panel-heading">
-              <div><small>PRÓXIMA ÁREA PROFISSIONAL</small><h2>Eventos</h2></div>
+              <div><small>AGENDA PROFISSIONAL</small><h2>Próximos eventos</h2></div>
+              {isPro && <Link href="/agenda" className="ghost-button">Abrir agenda</Link>}
             </div>
 
             {events.length === 0 ? (
               <div className="compact-empty">
                 <span>📅</span>
                 <b>Sem eventos ainda</b>
-                <p>Na próxima etapa vamos cadastrar clientes, eventos, custos e orçamentos.</p>
+                <p>Crie um evento profissional para acompanhar prazos, custos e tarefas na agenda.</p>
               </div>
             ) : (
               <div className="client-list">
