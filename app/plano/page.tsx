@@ -19,6 +19,7 @@ const proFeatures = [
   "Clientes e CRM",
   "Eventos profissionais",
   "Agenda, prazos e checklist operacional",
+  "Equipe, escala e diárias por evento",
   "Custos, lucro e margem",
   "Cobranças, sinal e contas a receber",
   "Orçamentos com aprovação online",
