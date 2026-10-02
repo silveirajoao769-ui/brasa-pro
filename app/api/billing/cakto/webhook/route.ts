@@ -83,12 +83,28 @@ export async function POST(request: NextRequest) {
     data.subscription_id,
   );
 
-  const nextPaymentDate = firstString(
+  const periodEnd = firstString(
+    subscription.current_period_end,
+    dataSubscription.current_period_end,
+    subscription.currentPeriodEnd,
+    dataSubscription.currentPeriodEnd,
     subscription.next_payment_date,
     dataSubscription.next_payment_date,
     subscription.nextPaymentDate,
     dataSubscription.nextPaymentDate,
+    subscription.ends_at,
+    dataSubscription.ends_at,
+    subscription.end_date,
+    dataSubscription.end_date,
+    body.current_period_end,
+    data.current_period_end,
   );
+
+  const fallbackPeriodEnd = () => {
+    const value = new Date();
+    value.setMonth(value.getMonth() + 1);
+    return value.toISOString();
+  };
 
   if (!event) {
     return NextResponse.json({ received: true, ignored: "event_missing" });
@@ -108,7 +124,7 @@ export async function POST(request: NextRequest) {
 
   const { data: subscriptionRow } = await admin
     .from("subscriptions")
-    .select("id, user_id, plan, status")
+    .select("id, user_id, plan, status, current_period_end, cancel_at_period_end")
     .eq("billing_email", email)
     .maybeSingle();
 
@@ -117,7 +133,7 @@ export async function POST(request: NextRequest) {
   }
 
   const activateEvents = new Set(["purchase_approved", "subscription_renewed"]);
-  const deactivateEvents = new Set(["refund", "chargeback", "subscription_canceled"]);
+  const immediateDeactivateEvents = new Set(["refund", "chargeback"]);
 
   if (activateEvents.has(event)) {
     await admin
@@ -128,7 +144,7 @@ export async function POST(request: NextRequest) {
         provider: "cakto",
         provider_subscription_id: subscriptionId,
         provider_product_id: productId || configuredProductId || null,
-        current_period_end: nextPaymentDate || null,
+        current_period_end: periodEnd || fallbackPeriodEnd(),
         cancel_at_period_end: false,
         last_provider_event: event,
       })
@@ -137,7 +153,25 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ received: true, applied: "pro_active" });
   }
 
-  if (deactivateEvents.has(event)) {
+  if (event === "subscription_canceled") {
+    await admin
+      .from("subscriptions")
+      .update({
+        plan: "pro",
+        status: "active",
+        provider: "cakto",
+        provider_subscription_id: subscriptionId || null,
+        provider_product_id: productId || configuredProductId || null,
+        current_period_end: periodEnd || subscriptionRow.current_period_end || fallbackPeriodEnd(),
+        cancel_at_period_end: true,
+        last_provider_event: event,
+      })
+      .eq("id", subscriptionRow.id);
+
+    return NextResponse.json({ received: true, applied: "pro_until_period_end" });
+  }
+
+  if (immediateDeactivateEvents.has(event)) {
     await admin
       .from("subscriptions")
       .update({
@@ -146,6 +180,7 @@ export async function POST(request: NextRequest) {
         provider: "cakto",
         provider_subscription_id: subscriptionId || null,
         provider_product_id: productId || configuredProductId || null,
+        current_period_end: new Date().toISOString(),
         cancel_at_period_end: false,
         last_provider_event: event,
       })
