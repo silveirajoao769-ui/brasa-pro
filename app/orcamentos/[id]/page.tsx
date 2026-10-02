@@ -78,6 +78,22 @@ export default async function QuotePage({ params }: PageProps) {
   const totalCost = Number(quote.total_cost || 0);
   const profit = price - totalCost;
   const perGuest = event.guests > 0 ? price / event.guests : 0;
+  const packageSnapshot = quote.service_package_snapshot as
+    | {
+        name?: string;
+        description?: string;
+        price_per_person?: number | string;
+        charged_guests?: number;
+        min_guests?: number;
+        items?: Array<{
+          category?: string;
+          name?: string;
+          quantity?: number | null;
+          unit?: string;
+          notes?: string;
+        }>;
+      }
+    | null;
 
   return (
     <main className="quote-page">
@@ -165,9 +181,51 @@ export default async function QuotePage({ params }: PageProps) {
           </div>
         </div>
 
+        {packageSnapshot && (
+          <div className="quote-section quote-package-section">
+            <div className="quote-section-heading">
+              <span>02</span>
+              <div><small>PACOTE CONTRATADO</small><h2>{packageSnapshot.name || "Pacote profissional"}</h2></div>
+            </div>
+
+            <div className="quote-package-summary">
+              <div>
+                <small>VALOR POR PESSOA</small>
+                <b>{money(Number(packageSnapshot.price_per_person || 0))}</b>
+              </div>
+              <div>
+                <small>PESSOAS COBRADAS</small>
+                <b>{packageSnapshot.charged_guests || event.guests}</b>
+              </div>
+              <div>
+                <small>MÍNIMO DO PACOTE</small>
+                <b>{packageSnapshot.min_guests || 1}</b>
+              </div>
+            </div>
+
+            {packageSnapshot.description && <p className="quote-muted">{packageSnapshot.description}</p>}
+
+            {packageSnapshot.items && packageSnapshot.items.length > 0 && (
+              <div className="quote-package-items">
+                {packageSnapshot.items.map((item, index) => (
+                  <div key={index}>
+                    <span>{item.category || "Incluído"}</span>
+                    <b>{item.name || "Item"}</b>
+                    <small>
+                      {item.quantity != null
+                        ? Number(item.quantity).toLocaleString("pt-BR") + " " + (item.unit || "un")
+                        : item.notes || "Incluído"}
+                    </small>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+        )}
+
         <div className="quote-section">
           <div className="quote-section-heading">
-            <span>02</span>
+            <span>{packageSnapshot ? "03" : "02"}</span>
             <div><small>COMPOSIÇÃO</small><h2>Custos considerados</h2></div>
           </div>
 
