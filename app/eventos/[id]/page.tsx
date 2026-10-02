@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
 import EventCostForm from "@/components/EventCostForm";
+import EventTaskToggle from "@/components/EventTaskToggle";
 import QuoteForm from "@/components/QuoteForm";
 import { createClient } from "@/lib/supabase/server";
 import { requirePro } from "@/lib/subscription";
@@ -53,7 +54,7 @@ export default async function EventDetailPage({ params }: PageProps) {
 
   if (!event) notFound();
 
-  const [{ data: costs }, clientResult, quoteResult] = await Promise.all([
+  const [{ data: costs }, clientResult, quoteResult, { data: tasks }] = await Promise.all([
     supabase
       .from("event_costs")
       .select("id, category, description, amount, created_at")
@@ -75,6 +76,13 @@ export default async function EventDetailPage({ params }: PageProps) {
       .order("created_at", { ascending: false })
       .limit(1)
       .maybeSingle(),
+    supabase
+      .from("event_tasks")
+      .select("id, title, due_at, completed, notes")
+      .eq("event_id", id)
+      .eq("user_id", user.id)
+      .order("completed", { ascending: true })
+      .order("due_at", { ascending: true, nullsFirst: false }),
   ]);
 
   const client = clientResult.data;
@@ -94,6 +102,7 @@ export default async function EventDetailPage({ params }: PageProps) {
           <span><b>Brasa <i>Pro</i></b><small>EVENTO PROFISSIONAL</small></span>
         </Link>
         <div className="detail-actions">
+          <Link href="/agenda" className="ghost-button">Agenda</Link>
           <Link href="/clientes" className="ghost-button">Clientes</Link>
           <Link href="/eventos" className="primary-button compact">← Eventos</Link>
         </div>
@@ -167,6 +176,46 @@ export default async function EventDetailPage({ params }: PageProps) {
             <EventCostForm eventId={event.id} />
           </article>
         </div>
+
+        <article className="detail-panel event-task-panel">
+          <div className="panel-heading">
+            <div>
+              <small>CHECKLIST DO EVENTO</small>
+              <h2>Pendências</h2>
+            </div>
+            <Link href="/agenda" className="ghost-button">Gerenciar na agenda</Link>
+          </div>
+
+          {!tasks || tasks.length === 0 ? (
+            <div className="compact-empty">
+              <span>☑</span>
+              <b>Sem tarefas vinculadas</b>
+              <p>Adicione prazos, confirmações e pendências na Agenda profissional.</p>
+            </div>
+          ) : (
+            <div className="agenda-task-list event-detail-task-list">
+              {tasks.slice(0, 8).map((task) => (
+                <div className={task.completed ? "agenda-task-row completed-event-task" : "agenda-task-row"} key={task.id}>
+                  <EventTaskToggle taskId={task.id} completed={task.completed} />
+                  <div className="agenda-task-main">
+                    <b>{task.title}</b>
+                    <span>
+                      {task.due_at
+                        ? new Intl.DateTimeFormat("pt-BR", {
+                            day: "2-digit",
+                            month: "short",
+                            hour: "2-digit",
+                            minute: "2-digit",
+                          }).format(new Date(task.due_at))
+                        : "Sem prazo definido"}
+                    </span>
+                    {task.notes && <small>{task.notes}</small>}
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+        </article>
 
         <article className="detail-panel quote-workspace">
           <div className="panel-heading">
