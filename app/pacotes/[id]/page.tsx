@@ -1,6 +1,9 @@
 import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
 import ServicePackageItemForm from "@/components/ServicePackageItemForm";
+import ServicePackageEditor from "@/components/ServicePackageEditor";
+import ServicePackageItemEditor from "@/components/ServicePackageItemEditor";
+import RecordDeleteButton from "@/components/RecordDeleteButton";
 import { createClient } from "@/lib/supabase/server";
 import { requirePro } from "@/lib/subscription";
 
@@ -71,7 +74,26 @@ export default async function PackageDetailPage({ params }: PageProps) {
             <h1>{packageData.name}</h1>
             <p>{packageData.description || "Pacote profissional para eventos."}</p>
           </div>
-          <span className="detail-status">{packageData.active ? "Ativo" : "Inativo"}</span>
+          <div className="detail-actions">
+            <span className="detail-status">{packageData.active ? "Ativo" : "Inativo"}</span>
+            <ServicePackageEditor
+              packageData={{
+                id: packageData.id,
+                name: packageData.name,
+                description: packageData.description,
+                price_per_person: packageData.price_per_person,
+                min_guests: packageData.min_guests,
+                active: packageData.active,
+                notes: packageData.notes,
+              }}
+            />
+            <RecordDeleteButton
+              table="service_packages"
+              id={packageData.id}
+              confirmText="Excluir este pacote? Orçamentos antigos continuarão com a cópia do pacote já salva."
+              redirectTo="/pacotes"
+            />
+          </div>
         </div>
 
         <div className="package-overview">
@@ -126,6 +148,7 @@ export default async function PackageDetailPage({ params }: PageProps) {
                                 : "Incluído"}
                           </span>
                           {item.notes && <small>{item.notes}</small>}
+                          <ServicePackageItemEditor item={item} />
                         </div>
                       ))}
                     </div>
