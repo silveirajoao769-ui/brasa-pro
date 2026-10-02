@@ -18,23 +18,23 @@ function firstString(...values: unknown[]) {
 }
 
 export async function POST(request: NextRequest) {
-  const expectedSecret = process.env.CAKTO_WEBHOOK_SECRET;
-  const suppliedSecret = request.nextUrl.searchParams.get("key");
-
-  if (!expectedSecret || suppliedSecret !== expectedSecret) {
-    return NextResponse.json({ error: "Webhook não autorizado." }, { status: 401 });
-  }
-
-  if (!process.env.SUPABASE_SERVICE_ROLE_KEY) {
-    return NextResponse.json({ error: "Servidor não configurado." }, { status: 503 });
-  }
-
   let body: JsonRecord;
 
   try {
     body = asRecord(await request.json());
   } catch {
     return NextResponse.json({ error: "Payload inválido." }, { status: 400 });
+  }
+
+  const expectedSecret = process.env.CAKTO_WEBHOOK_SECRET;
+  const suppliedSecret = firstString(body.secret);
+
+  if (!expectedSecret || !suppliedSecret || suppliedSecret !== expectedSecret) {
+    return NextResponse.json({ error: "Webhook não autorizado." }, { status: 401 });
+  }
+
+  if (!process.env.SUPABASE_SERVICE_ROLE_KEY) {
+    return NextResponse.json({ error: "Servidor não configurado." }, { status: 503 });
   }
 
   const data = asRecord(body.data);
