@@ -25,23 +25,28 @@ export default async function OnboardingPage() {
       : "consumer";
 
   return (
-    <main className="onboarding-page">
-      <div className="shell onboarding-topbar">
-        <Link href="/" className="brand">
-          <span className="brand-flame">🔥</span>
-          <span><b>Brasa <i>Pro</i></b><small>PRIMEIRO ACESSO</small></span>
-        </Link>
-        <span className="onboarding-step">PASSO 1 DE 1</span>
-      </div>
+    <main className="signup-page onboarding-premium-page">
+      <div className="signup-backdrop" aria-hidden="true" />
 
-      <section className="shell onboarding-shell">
-        <div className="onboarding-copy">
-          <span className="eyebrow">BEM-VINDO AO BRASA PRO</span>
-          <h1>Vamos preparar a plataforma para o seu jeito de usar.</h1>
+      <section className="signup-shell onboarding-premium-shell">
+        <header className="signup-brand-row">
+          <Link href="/" className="signup-brand">
+            <span className="access-flame-mark">🔥</span>
+            <span className="signup-brand-copy">
+              <b>Brasa <i>Pro</i></b>
+              <small>PRIMEIRO ACESSO</small>
+            </span>
+          </Link>
+          <span className="onboarding-step">PASSO 1 DE 1</span>
+        </header>
+
+        <section className="signup-hero onboarding-premium-hero">
+          <span className="signup-kicker">BEM-VINDO AO BRASA PRO</span>
+          <h1>Prepare a plataforma para o seu <span>jeito</span></h1>
           <p>
-            Escolha seu perfil e complete os dados básicos. Depois o Brasa Pro leva você direto para o melhor ponto de partida.
+            Escolha como vai usar o Brasa Pro e complete os dados básicos. Depois você vai direto para o melhor ponto de partida.
           </p>
-        </div>
+        </section>
 
         <OnboardingForm
           initial={{
