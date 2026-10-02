@@ -93,104 +93,16 @@ export default function AuthForm({ mode }: AuthFormProps) {
     }
 
     if (mode === "signup") {
-      const emailRedirectTo =
-        window.location.origin + "/auth/callback?next=" + encodeURIComponent("/dashboard");
-
-      const { data, error } = await supabase.auth.signUp({
-        email,
-        password: formPassword,
-        options: {
-          emailRedirectTo,
-          data: {
-            full_name: fullName,
-            account_type: accountType,
-            tax_id: accountType === "professional" ? taxId : null,
-          },
-        },
-      });
-
-      if (error) {
-        setMessage(error.message);
-        setLoading(false);
-        return;
-      }
-
-      if (!data.session) {
-        const repeatedSignup = (data.user?.identities?.length || 0) === 0;
-
-        setMessage(
-          repeatedSignup
-            ? "Esse e-mail já pode ter sido cadastrado. Entre na conta ou use a recuperação de senha."
-            : "Cadastro recebido. Confira sua caixa de entrada e o spam para confirmar o e-mail."
-        );
-
-        setLoading(false);
-        return;
-      }
-    } else {
-      const { error } = await supabase.auth.signInWithPassword({
-        email,
-        password: formPassword,
-      });
-
-      if (error) {
-        setMessage("E-mail ou senha inválidos.");
-        setLoading(false);
-        return;
-      }
-    }
-
-    router.push("/dashboard");
-    router.refresh();
-  }
-
-  if (mode === "signup") {
     return (
-      <form className="signup-auth-form" onSubmit={handleSubmit}>
-        <fieldset className="signup-persona-fieldset">
-          <legend>Como você vai usar o Brasa Pro?</legend>
-          <div className="signup-persona-options">
-            <button
-              type="button"
-              className={accountType === "professional" ? "signup-persona-option active" : "signup-persona-option"}
-              onClick={() => setAccountType("professional")}
-            >
-              <span className="persona-mini-icon">♨</span>
-              <b>Trabalho com churrasco</b>
-              <small>Eventos e gestão profissional</small>
-            </button>
-
-            <button
-              type="button"
-              className={accountType === "consumer" ? "signup-persona-option active" : "signup-persona-option"}
-              onClick={() => setAccountType("consumer")}
-            >
-              <span className="persona-mini-icon">◎</span>
-              <b>Uso pessoal</b>
-              <small>Amigos, família e eventos</small>
-            </button>
-
-            <button
-              type="button"
-              className="signup-persona-option coming-soon"
-              disabled
-              aria-disabled="true"
-            >
-              <span className="persona-mini-icon">▣</span>
-              <b>Sou fornecedor</b>
-              <small>Em breve</small>
-            </button>
-          </div>
-        </fieldset>
-
+      <form className="signup-auth-form signup-showcase-auth-form" onSubmit={handleSubmit}>
         <label className="signup-field">
-          <span>Seu nome</span>
+          <span>Nome completo</span>
           <div className="signup-input-wrap">
             <i><FieldIcon kind="user" /></i>
             <input
               name="fullName"
               type="text"
-              placeholder="Como devemos te chamar?"
+              placeholder="Seu nome completo"
               autoComplete="name"
             />
           </div>
@@ -203,14 +115,14 @@ export default function AuthForm({ mode }: AuthFormProps) {
             <input
               name="email"
               type="email"
-              placeholder="voce@email.com"
+              placeholder="seu@email.com"
               autoComplete="email"
             />
           </div>
         </label>
 
         {accountType === "professional" && (
-          <label className="signup-field">
+          <label className="signup-field signup-tax-field">
             <span>CPF ou CNPJ</span>
             <div className="signup-input-wrap">
               <i><FieldIcon kind="user" /></i>
@@ -220,7 +132,7 @@ export default function AuthForm({ mode }: AuthFormProps) {
                 inputMode="numeric"
                 value={taxId}
                 onChange={(event) => setTaxId(formatTaxId(event.target.value))}
-                placeholder="Obrigatório para conta profissional"
+                placeholder="000.000.000-00"
                 autoComplete="off"
               />
             </div>
@@ -236,7 +148,7 @@ export default function AuthForm({ mode }: AuthFormProps) {
               type={showPassword ? "text" : "password"}
               value={password}
               onChange={(event) => setPassword(event.target.value)}
-              placeholder="Mínimo de 8 caracteres"
+              placeholder="Crie uma senha segura"
               minLength={8}
               autoComplete="new-password"
             />
@@ -259,9 +171,45 @@ export default function AuthForm({ mode }: AuthFormProps) {
           )}
         </label>
 
+        <fieldset className="signup-persona-fieldset signup-showcase-persona">
+          <legend>Qual é o seu perfil?</legend>
+          <div className="signup-persona-options">
+            <button
+              type="button"
+              className={accountType === "professional" ? "signup-persona-option active" : "signup-persona-option"}
+              onClick={() => setAccountType("professional")}
+            >
+              <span className="persona-mini-icon">♨</span>
+              <b>Churrasqueiro profissional</b>
+              <small>Eventos e gestão profissional</small>
+            </button>
+
+            <button
+              type="button"
+              className={accountType === "consumer" ? "signup-persona-option active" : "signup-persona-option"}
+              onClick={() => setAccountType("consumer")}
+            >
+              <span className="persona-mini-icon">◎</span>
+              <b>Uso pessoal</b>
+              <small>Amigos, família e eventos</small>
+            </button>
+
+            <button
+              type="button"
+              className="signup-persona-option coming-soon"
+              disabled
+              aria-disabled="true"
+            >
+              <span className="persona-mini-icon">▣</span>
+              <b>Fornecedor</b>
+              <small>Em breve</small>
+            </button>
+          </div>
+        </fieldset>
+
         {message && <div className="auth-message signup-auth-message">{message}</div>}
 
-        <button className="signup-submit" disabled={loading} type="submit">
+        <button className="signup-submit signup-showcase-submit" disabled={loading} type="submit">
           <span>{loading ? "Aguarde..." : "Criar minha conta"}</span>
           <b>→</b>
         </button>
