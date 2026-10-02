@@ -15,7 +15,7 @@ export default async function SettingsPage() {
 
   const { data: profile } = await supabase
     .from("profiles")
-    .select("full_name, business_name, phone, business_email, instagram, city, state, tax_id, address_line, zip_code, professional_bio, logo_url")
+    .select("full_name, business_name, phone, business_email, instagram, city, state, tax_id, address_line, zip_code, professional_bio, logo_url, account_type")
     .eq("id", user.id)
     .maybeSingle();
 
@@ -52,6 +52,7 @@ export default async function SettingsPage() {
             zip_code: profile?.zip_code || null,
             professional_bio: profile?.professional_bio || null,
             logo_url: profile?.logo_url || null,
+            account_type: profile?.account_type || "consumer",
           }}
         />
       </section>
