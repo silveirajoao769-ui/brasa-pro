@@ -2,6 +2,7 @@ import Link from "next/link";
 import { redirect } from "next/navigation";
 import EventForm from "@/components/EventForm";
 import { createClient } from "@/lib/supabase/server";
+import { requirePro } from "@/lib/subscription";
 
 export const dynamic = "force-dynamic";
 
@@ -35,6 +36,7 @@ export default async function EventsPage() {
   const { data: { user } } = await supabase.auth.getUser();
 
   if (!user) redirect("/login");
+  await requirePro(supabase, user.id, "Eventos profissionais");
 
   const [{ data: clients }, { data: events }] = await Promise.all([
     supabase
