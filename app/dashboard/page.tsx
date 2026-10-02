@@ -176,6 +176,7 @@ export default async function DashboardPage() {
           <Link href="/fornecedores">🚚 <span>Fornecedores</span>{!isPro && <small className="nav-pro-tag">PRO</small>}</Link>
           <Link href="/fornecedor">🏪 <span>Portal fornecedor</span>{!isPro && <small className="nav-pro-tag">PRO</small>}</Link>
           <Link href="/configuracoes">⚙ <span>Configurações</span>{!isPro && <small className="nav-pro-tag">PRO</small>}</Link>
+          <Link href="/suporte">? <span>Ajuda e suporte</span></Link>
           <Link href="/plano">💳 <span>Plano</span></Link>
         </nav>
         <div className="sidebar-footer">
