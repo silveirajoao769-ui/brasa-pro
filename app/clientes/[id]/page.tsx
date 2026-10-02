@@ -2,6 +2,7 @@ import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
 import ClientCRMSettings from "@/components/ClientCRMSettings";
 import ClientActivityForm from "@/components/ClientActivityForm";
+import ClientProfileEditor from "@/components/ClientProfileEditor";
 import ClientDeleteButton from "@/components/ClientDeleteButton";
 import { createClient } from "@/lib/supabase/server";
 import { requirePro } from "@/lib/subscription";
@@ -225,6 +226,15 @@ export default async function ClientDetailPage({ params }: PageProps) {
             <small>ETAPA</small>
             <strong>{stageLabels[client.crm_stage] || client.crm_stage}</strong>
             <span>{client.source ? "Origem: " + client.source : "Origem não informada"}</span>
+            <ClientProfileEditor
+              client={{
+                id: client.id,
+                name: client.name,
+                phone: client.phone,
+                email: client.email,
+                notes: client.notes,
+              }}
+            />
           </div>
         </div>
 
