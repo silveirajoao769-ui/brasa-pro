@@ -12,27 +12,35 @@ export default async function NewPasswordPage() {
   if (!user) redirect("/esqueci-senha");
 
   return (
-    <main className="auth-page">
-      <section className="auth-shell">
-        <div className="auth-brand-side">
-          <Link href="/" className="brand">
-            <span className="brand-flame">🔥</span>
-            <span><b>Brasa <i>Pro</i></b><small>NOVA SENHA</small></span>
-          </Link>
+    <main className="signup-page access-premium-page">
+      <div className="signup-backdrop" aria-hidden="true" />
 
-          <div>
-            <span className="eyebrow">ACESSO SEGURO</span>
-            <h1>Crie uma nova senha para sua conta.</h1>
+      <section className="signup-shell access-premium-shell">
+        <header className="signup-brand-row">
+          <Link href="/" className="signup-brand">
+            <span className="access-flame-mark">🔥</span>
+            <span className="signup-brand-copy">
+              <b>Brasa <i>Pro</i></b>
+              <small>NOVA SENHA</small>
+            </span>
+          </Link>
+        </header>
+
+        <section className="signup-hero access-premium-hero compact">
+          <span className="signup-kicker">ACESSO SEGURO</span>
+          <h1>Crie sua nova <span>senha</span></h1>
+          <p>Use pelo menos 8 caracteres e guarde sua nova credencial com segurança.</p>
+        </section>
+
+        <section className="signup-card access-premium-card access-compact-card">
+          <div className="signup-card-heading">
+            <span className="eyebrow">ATUALIZAR CREDENCIAL</span>
+            <h2>Nova senha.</h2>
             <p>Depois da alteração você volta diretamente para o Dashboard.</p>
           </div>
-        </div>
 
-        <div className="auth-card">
-          <span className="eyebrow">NOVA SENHA</span>
-          <h2>Atualizar credencial</h2>
-          <p>Use pelo menos 8 caracteres.</p>
           <NewPasswordForm />
-        </div>
+        </section>
       </section>
     </main>
   );
