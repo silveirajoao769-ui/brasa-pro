@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
+import { getSubscription, isActivePro } from "@/lib/subscription";
 import {
   calculateBarbecuePlan,
   CUT_CATALOG,
@@ -207,10 +208,12 @@ export async function POST(request: NextRequest) {
     );
   }
 
+  const subscription = await getSubscription(supabase, user.id);
+  const proAccess = isActivePro(subscription);
   const apiKey = process.env.OPENAI_API_KEY;
 
-  // Sem chave a plataforma continua funcional usando o motor determinístico.
-  if (!apiKey) {
+  // No Free, o usuário continua com o motor determinístico sem gerar custo de IA.
+  if (!proAccess || !apiKey) {
     return NextResponse.json({ plan: fallbackPlan(prompt) });
   }
 
