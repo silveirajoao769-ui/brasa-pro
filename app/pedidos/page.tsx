@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
+import { isMarketplaceEnabled } from "@/lib/features";
 
 export const dynamic = "force-dynamic";
 
@@ -21,6 +22,8 @@ const statusLabels: Record<string, string> = {
 };
 
 export default async function OrdersPage() {
+  if (!isMarketplaceEnabled()) redirect("/em-breve?feature=Marketplace");
+
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
 
