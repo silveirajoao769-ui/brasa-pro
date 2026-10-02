@@ -30,10 +30,75 @@ type AIPlan = {
   engine: "openai" | "rules";
 };
 
+type AIIntent = {
+  title: string;
+  adults: number;
+  children: number;
+  durationHours: number;
+  budget: number;
+  style: "economic" | "balanced" | "premium" | "custom";
+  selectedCuts: string[];
+  summary: string;
+  tips: string[];
+};
+
 function normalizeMoney(raw: string) {
   const cleaned = raw.replace(/\./g, "").replace(",", ".");
   const parsed = Number(cleaned);
   return Number.isFinite(parsed) ? parsed : 0;
+}
+
+function styleToPlanner(style: AIIntent["style"]): PlannerStyle {
+  if (style === "economic") return "economico";
+  if (style === "premium") return "premium";
+  if (style === "custom") return "personalizado";
+  return "equilibrado";
+}
+
+function plannerToPublic(style: PlannerStyle): AIPlan["style"] {
+  if (style === "economico") return "economic";
+  if (style === "premium") return "premium";
+  if (style === "personalizado") return "custom";
+  return "balanced";
+}
+
+function buildPlanFromIntent(intent: AIIntent, engine: AIPlan["engine"]): AIPlan {
+  const plannerStyle = styleToPlanner(intent.style);
+  const validCutIds = new Set(CUT_CATALOG.map((cut) => cut.id));
+
+  const selectedCuts = intent.selectedCuts
+    .filter((id) => validCutIds.has(id))
+    .slice(0, 8);
+
+  const cuts =
+    selectedCuts.length > 0
+      ? selectedCuts
+      : STYLE_PRESETS[plannerStyle === "personalizado" ? "equilibrado" : plannerStyle];
+
+  const calculated = calculateBarbecuePlan({
+    adults: Math.max(1, Math.min(500, Math.round(intent.adults))),
+    children: Math.max(0, Math.min(500, Math.round(intent.children))),
+    duration: Math.max(2, Math.min(12, intent.durationHours)),
+    selectedCuts: cuts,
+  });
+
+  return {
+    title: intent.title || "Churrasco planejado com IA Brasa",
+    adults: Math.max(1, Math.min(500, Math.round(intent.adults))),
+    children: Math.max(0, Math.min(500, Math.round(intent.children))),
+    durationHours: Math.max(2, Math.min(12, intent.durationHours)),
+    budget: Math.max(0, intent.budget || 0),
+    style: plannerToPublic(
+      selectedCuts.length > 0 && intent.style === "custom"
+        ? "personalizado"
+        : plannerStyle,
+    ),
+    summary: intent.summary,
+    tips: intent.tips.slice(0, 6),
+    estimate: calculated.estimate,
+    items: calculated.items,
+    engine,
+  };
 }
 
 function fallbackPlan(prompt: string): AIPlan {
@@ -49,7 +114,7 @@ function fallbackPlan(prompt: string): AIPlan {
   const budget = budgetMatch ? normalizeMoney(budgetMatch[1]) : 0;
 
   const lower = prompt.toLowerCase();
-  let style: PlannerStyle =
+  let plannerStyle: PlannerStyle =
     lower.includes("premium") || lower.includes("picanha")
       ? "premium"
       : lower.includes("econôm") || lower.includes("barato") || lower.includes("economizar")
@@ -60,56 +125,33 @@ function fallbackPlan(prompt: string): AIPlan {
     lower.includes(cut.name.toLowerCase()),
   ).map((cut) => cut.id);
 
-  const selectedCuts = mentionedCuts.length > 0 ? mentionedCuts : STYLE_PRESETS[style];
+  if (mentionedCuts.length > 0) plannerStyle = "personalizado";
 
-  if (mentionedCuts.length > 0) style = "personalizado";
-
-  const calculated = calculateBarbecuePlan({
-    adults,
-    children,
-    duration: durationHours,
-    selectedCuts,
-  });
-
-  const diff = budget > 0 ? budget - calculated.estimate : null;
-  const tips = [
-    "Compre as carnes por último para reduzir o tempo fora de refrigeração.",
-    "Separe carvão e gelo antes do dia do evento para evitar compras de emergência.",
-  ];
-
-  if (diff != null && diff < 0) {
-    tips.unshift(
-      "O plano ficou acima do orçamento. Trocar parte dos cortes premium por fraldinha, acém ou linguiça reduz o custo.",
-    );
-  } else if (diff != null) {
-    tips.unshift("O plano cabe no orçamento informado com margem para pequenos ajustes.");
-  }
-
-  return {
+  const intent: AIIntent = {
     title: "Churrasco planejado com IA Brasa",
     adults,
     children,
     durationHours,
     budget,
-    style:
-      style === "economico"
-        ? "economic"
-        : style === "equilibrado"
-          ? "balanced"
-          : style === "premium"
-            ? "premium"
-            : "custom",
+    style: plannerToPublic(plannerStyle),
+    selectedCuts: mentionedCuts,
     summary:
       "Plano montado a partir do seu pedido com quantidades proporcionais aos convidados e ao tempo de evento.",
-    tips,
-    estimate: calculated.estimate,
-    items: calculated.items,
-    engine: "rules",
+    tips: [
+      budget > 0
+        ? "Use o orçamento como referência e ajuste os cortes antes de comprar."
+        : "Compare preços dos cortes antes da compra para melhorar o custo total.",
+      "Compre as carnes por último para reduzir o tempo fora de refrigeração.",
+      "Separe carvão e gelo antes do dia do evento para evitar compras de emergência.",
+    ],
   };
+
+  return buildPlanFromIntent(intent, "rules");
 }
 
 function extractResponseText(payload: unknown) {
   if (!payload || typeof payload !== "object") return "";
+
   const data = payload as {
     output_text?: string;
     output?: Array<{
@@ -131,18 +173,14 @@ function extractResponseText(payload: unknown) {
 }
 
 export async function POST(request: NextRequest) {
-  if (process.env.AI_BRASA_ENABLED !== "true") {
-    return NextResponse.json(
-      { error: "IA Brasa ainda não está disponível." },
-      { status: 404 },
-    );
-  }
-
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
 
   if (!user) {
-    return NextResponse.json({ error: "Faça login para usar a IA Brasa." }, { status: 401 });
+    return NextResponse.json(
+      { error: "Faça login para usar a IA Brasa." },
+      { status: 401 },
+    );
   }
 
   let body: { prompt?: string };
@@ -171,11 +209,14 @@ export async function POST(request: NextRequest) {
 
   const apiKey = process.env.OPENAI_API_KEY;
 
+  // Sem chave a plataforma continua funcional usando o motor determinístico.
   if (!apiKey) {
     return NextResponse.json({ plan: fallbackPlan(prompt) });
   }
 
+  const cutIds = CUT_CATALOG.map((cut) => cut.id);
   const catalog = CUT_CATALOG.map((cut) => ({
+    id: cut.id,
     name: cut.name,
     referencePricePerKg: cut.pricePerKg,
   }));
@@ -193,34 +234,19 @@ export async function POST(request: NextRequest) {
         type: "string",
         enum: ["economic", "balanced", "premium", "custom"],
       },
+      selectedCuts: {
+        type: "array",
+        maxItems: 8,
+        items: {
+          type: "string",
+          enum: cutIds,
+        },
+      },
       summary: { type: "string" },
       tips: {
         type: "array",
+        maxItems: 6,
         items: { type: "string" },
-      },
-      estimate: { type: "number", minimum: 0 },
-      items: {
-        type: "array",
-        items: {
-          type: "object",
-          additionalProperties: false,
-          properties: {
-            category: { type: "string" },
-            name: { type: "string" },
-            quantity: { type: "number", minimum: 0 },
-            unit: { type: "string" },
-            unitPrice: { type: "number", minimum: 0 },
-            estimatedPrice: { type: "number", minimum: 0 },
-          },
-          required: [
-            "category",
-            "name",
-            "quantity",
-            "unit",
-            "unitPrice",
-            "estimatedPrice",
-          ],
-        },
       },
     },
     required: [
@@ -230,10 +256,9 @@ export async function POST(request: NextRequest) {
       "durationHours",
       "budget",
       "style",
+      "selectedCuts",
       "summary",
       "tips",
-      "estimate",
-      "items",
     ],
   };
 
@@ -245,21 +270,27 @@ export async function POST(request: NextRequest) {
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        model: "gpt-6-luna",
+        model: process.env.OPENAI_MODEL || "gpt-6-luna",
+        store: false,
+        max_output_tokens: 1200,
         instructions:
-          "Você é a IA Brasa, especialista em planejamento prático de churrasco no Brasil. " +
-          "Transforme pedidos em um plano objetivo. Respeite o orçamento sempre que possível. " +
-          "Use preços como estimativas, nunca como preços garantidos. Prefira cortes do catálogo de referência. " +
-          "Considere crianças com consumo menor que adultos. Inclua carnes, bebidas, acompanhamentos, carvão e gelo. " +
-          "Não invente marcas. Seja conservador com quantidades para evitar desperdício sem deixar faltar.",
+          "Você é a IA Brasa, assistente de churrasco do Brasil. " +
+          "Sua função é interpretar o pedido do usuário e estruturar as preferências. " +
+          "NÃO calcule quantidades finais nem preços finais: o motor determinístico do Brasa Pro fará isso. " +
+          "Use apenas IDs de cortes presentes no catálogo. " +
+          "Considere crianças separadamente quando o usuário informar. " +
+          "Se o usuário disser apenas o total de pessoas, considere todos adultos salvo indicação contrária. " +
+          "Respeite o orçamento como preferência, não como garantia. " +
+          "As dicas devem ser curtas, práticas e sem inventar marcas ou preços.",
         input:
-          "Pedido do usuário:\n" + prompt +
-          "\n\nCatálogo de referência de cortes e preços por kg:\n" +
+          "Pedido do usuário:\n" +
+          prompt +
+          "\n\nCatálogo permitido de cortes:\n" +
           JSON.stringify(catalog),
         text: {
           format: {
             type: "json_schema",
-            name: "brasa_plan",
+            name: "brasa_intent",
             strict: true,
             schema,
           },
@@ -279,8 +310,8 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ plan: fallbackPlan(prompt) });
     }
 
-    const parsed = JSON.parse(outputText) as Omit<AIPlan, "engine">;
-    const plan: AIPlan = { ...parsed, engine: "openai" };
+    const intent = JSON.parse(outputText) as AIIntent;
+    const plan = buildPlanFromIntent(intent, "openai");
 
     return NextResponse.json({ plan });
   } catch {
