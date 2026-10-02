@@ -157,18 +157,18 @@ export async function POST(request: NextRequest) {
     await admin
       .from("subscriptions")
       .update({
-        plan: "free",
-        status: "canceled",
+        plan: "pro",
+        status: "active",
         provider: "cakto",
         provider_subscription_id: subscriptionId || null,
         provider_product_id: productId || configuredProductId || null,
-        current_period_end: new Date().toISOString(),
-        cancel_at_period_end: false,
+        current_period_end: periodEnd || subscriptionRow.current_period_end || fallbackPeriodEnd(),
+        cancel_at_period_end: true,
         last_provider_event: event,
       })
       .eq("id", subscriptionRow.id);
 
-    return NextResponse.json({ received: true, applied: "free_canceled" });
+    return NextResponse.json({ received: true, applied: "pro_until_period_end" });
   }
 
   if (immediateDeactivateEvents.has(event)) {
