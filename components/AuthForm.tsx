@@ -270,27 +270,42 @@ export default function AuthForm({ mode }: AuthFormProps) {
   }
 
   return (
-    <form className="auth-form" onSubmit={handleSubmit}>
-      <label>
-        E-mail
-        <input name="email" type="email" placeholder="voce@email.com" autoComplete="email" />
+    <form className="signup-auth-form access-auth-form" onSubmit={handleSubmit}>
+      <label className="signup-field">
+        <span>E-mail</span>
+        <div className="signup-input-wrap">
+          <i><FieldIcon kind="mail" /></i>
+          <input name="email" type="email" placeholder="voce@email.com" autoComplete="email" />
+        </div>
       </label>
 
-      <label>
-        Senha
-        <input
-          name="password"
-          type="password"
-          placeholder="Sua senha"
-          minLength={6}
-          autoComplete="current-password"
-        />
+      <label className="signup-field">
+        <span>Senha</span>
+        <div className="signup-input-wrap">
+          <i><FieldIcon kind="lock" /></i>
+          <input
+            name="password"
+            type={showPassword ? "text" : "password"}
+            placeholder="Sua senha"
+            minLength={6}
+            autoComplete="current-password"
+          />
+          <button
+            className="signup-password-toggle"
+            type="button"
+            aria-label={showPassword ? "Ocultar senha" : "Mostrar senha"}
+            onClick={() => setShowPassword(!showPassword)}
+          >
+            <EyeIcon hidden={!showPassword} />
+          </button>
+        </div>
       </label>
 
-      {message && <div className="auth-message">{message}</div>}
+      {message && <div className="auth-message signup-auth-message">{message}</div>}
 
-      <button className="primary-button wide" disabled={loading} type="submit">
-        {loading ? "Aguarde..." : "Entrar →"}
+      <button className="signup-submit" disabled={loading} type="submit">
+        <span>{loading ? "Aguarde..." : "Entrar no Brasa Pro"}</span>
+        <b>→</b>
       </button>
     </form>
   );
