@@ -2,6 +2,8 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import PartnerOrderForm from "@/components/PartnerOrderForm";
 import { createClient } from "@/lib/supabase/server";
+import { redirect } from "next/navigation";
+import { isMarketplaceEnabled } from "@/lib/features";
 
 export const dynamic = "force-dynamic";
 
@@ -17,6 +19,8 @@ function money(value: number) {
 }
 
 export default async function PartnerDetailPage({ params }: PageProps) {
+  if (!isMarketplaceEnabled()) redirect("/em-breve?feature=Marketplace");
+
   const { slug } = await params;
   const supabase = await createClient();
 
