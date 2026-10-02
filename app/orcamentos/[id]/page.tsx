@@ -103,6 +103,7 @@ export default async function QuotePage({ params }: PageProps) {
           <span><b>Brasa <i>Pro</i></b><small>ORÇAMENTO PROFISSIONAL</small></span>
         </Link>
         <div className="detail-actions">
+          <Link href={"/ia-brasa?mode=quote&eventId=" + event.id} className="ghost-button">✦ Revisar com IA</Link>
           <Link href={"/eventos/" + event.id} className="ghost-button">← Voltar ao evento</Link>
         </div>
       </div>
