@@ -12,39 +12,46 @@ export default async function LoginPage() {
   if (user) redirect("/dashboard");
 
   return (
-    <main className="auth-page">
-      <section className="auth-shell">
-        <div className="auth-brand-side">
-          <Link href="/" className="brand">
-            <span className="brand-flame">🔥</span>
-            <span><b>Brasa <i>Pro</i></b><small>CHURRASCO COM MAIS RESULTADO</small></span>
+    <main className="signup-page access-premium-page">
+      <div className="signup-backdrop" aria-hidden="true" />
+
+      <section className="signup-shell access-premium-shell">
+        <header className="signup-brand-row">
+          <Link href="/" className="signup-brand">
+            <span className="access-flame-mark">🔥</span>
+            <span className="signup-brand-copy">
+              <b>Brasa <i>Pro</i></b>
+              <small>PLANEJE · CALCULE · VENDA · CRESÇA</small>
+            </span>
           </Link>
+        </header>
 
-          <div>
-            <span className="eyebrow">BEM-VINDO DE VOLTA</span>
-            <h1>Entre e continue seu próximo churrasco.</h1>
-            <p>Planejamentos, clientes, eventos e resultados ficam salvos na sua conta.</p>
+        <section className="signup-hero access-premium-hero">
+          <span className="signup-kicker">BEM-VINDO DE VOLTA</span>
+          <h1>Continue de onde <span>parou</span></h1>
+          <p>
+            Seus churrascos, clientes, eventos e resultados continuam salvos na sua conta.
+          </p>
+        </section>
+
+        <section className="signup-card access-premium-card">
+          <div className="signup-card-heading">
+            <span className="eyebrow">ENTRAR</span>
+            <h2>Acesse sua conta.</h2>
+            <p>Use seu e-mail e senha cadastrados no Brasa Pro.</p>
           </div>
 
-          <div className="auth-benefits">
-            <span>✓ Seus planejamentos salvos</span>
-            <span>✓ Área profissional</span>
-            <span>✓ Custos e lucro por evento</span>
-          </div>
-        </div>
-
-        <div className="auth-card">
-          <span className="eyebrow">ENTRAR</span>
-          <h2>Acesse sua conta</h2>
-          <p>Use o e-mail e a senha cadastrados no Brasa Pro.</p>
           <AuthForm mode="login" />
-          <div className="auth-recovery-link">
+
+          <div className="access-card-links">
             <Link href="/esqueci-senha">Esqueci minha senha</Link>
           </div>
-          <div className="auth-switch">
-            Ainda não tem conta? <Link href="/cadastro">Criar conta grátis</Link>
+
+          <div className="signup-switch">
+            <span>Ainda não tem uma conta?</span>
+            <Link href="/cadastro">Criar conta grátis</Link>
           </div>
-        </div>
+        </section>
       </section>
     </main>
   );
