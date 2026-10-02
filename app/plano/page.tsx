@@ -20,6 +20,7 @@ const proFeatures = [
   "Eventos profissionais",
   "Agenda, prazos e checklist operacional",
   "Equipe, escala e diárias por evento",
+  "Pacotes e cardápios com preço por pessoa",
   "Custos, lucro e margem",
   "Cobranças, sinal e contas a receber",
   "Orçamentos com aprovação online",
