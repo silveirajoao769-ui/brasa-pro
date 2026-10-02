@@ -60,7 +60,18 @@ export default function AuthForm({ mode }: AuthFormProps) {
       }
 
       if (!data.session) {
-        setMessage("Cadastro criado. Confira seu e-mail para confirmar a conta.");
+        const repeatedSignup = (data.user?.identities?.length || 0) === 0;
+
+        if (repeatedSignup) {
+          setMessage(
+            "Esse e-mail já pode ter sido cadastrado antes. Toque em Entrar; se não lembrar a senha, use Esqueci minha senha."
+          );
+        } else {
+          setMessage(
+            "Cadastro recebido. Confira sua caixa de entrada e o spam para confirmar o e-mail."
+          );
+        }
+
         setLoading(false);
         return;
       }
