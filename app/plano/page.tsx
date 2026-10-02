@@ -22,6 +22,7 @@ const proFeatures = [
   "Equipe, escala e diárias por evento",
   "Pacotes e cardápios com preço por pessoa",
   "Custos, lucro e margem",
+  "Relatórios e indicadores do negócio",
   "Cobranças, sinal e contas a receber",
   "Orçamentos com aprovação online",
   "Contrato digital com aceite eletrônico",
