@@ -3,6 +3,7 @@ import { redirect } from "next/navigation";
 import InventoryItemForm from "@/components/InventoryItemForm";
 import InventoryMovementForm from "@/components/InventoryMovementForm";
 import { createClient } from "@/lib/supabase/server";
+import { requirePro } from "@/lib/subscription";
 
 export const dynamic = "force-dynamic";
 
@@ -18,6 +19,7 @@ export default async function InventoryPage() {
   const { data: { user } } = await supabase.auth.getUser();
 
   if (!user) redirect("/login");
+  await requirePro(supabase, user.id, "Controle de estoque");
 
   const [{ data: items }, { data: suppliers }, { data: movements }] = await Promise.all([
     supabase
