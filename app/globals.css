@@ -5079,3 +5079,17 @@ footer { border-top: 1px solid var(--line); padding: 30px 0; }
     grid-column: auto;
   }
 }
+
+
+.event-task-panel {
+  margin-top: 14px;
+}
+.event-detail-task-list {
+  margin-top: 16px;
+}
+.completed-event-task {
+  opacity: .62;
+}
+.completed-event-task .agenda-task-main b {
+  text-decoration: line-through;
+}
