@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import TeamMemberForm from "@/components/TeamMemberForm";
+import TeamMemberEditor from "@/components/TeamMemberEditor";
 import { createClient } from "@/lib/supabase/server";
 import { requirePro } from "@/lib/subscription";
 
@@ -166,6 +167,7 @@ export default async function TeamPage() {
                       <small>DIÁRIA PADRÃO</small>
                       <strong>{money(Number(member.default_daily_rate || 0))}</strong>
                     </div>
+                    <TeamMemberEditor member={member} />
                   </div>
                 ))}
               </div>
