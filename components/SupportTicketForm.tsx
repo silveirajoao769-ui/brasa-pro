@@ -33,40 +33,19 @@ export default function SupportTicketForm() {
       return;
     }
 
-    const { data: ticket, error: ticketError } = await supabase
-      .from("support_tickets")
-      .insert({
-        user_id: user.id,
-        subject,
-        category,
-        status: "open",
-      })
-      .select("id")
-      .single();
+    const { data: ticketId, error } = await supabase.rpc("create_support_ticket", {
+      p_subject: subject,
+      p_category: category,
+      p_content: content,
+    });
 
-    if (ticketError || !ticket) {
-      setMessage(ticketError?.message || "Não foi possível abrir o chamado.");
+    if (error || !ticketId) {
+      setMessage(error?.message || "Não foi possível abrir o chamado.");
       setLoading(false);
       return;
     }
 
-    const { error: messageError } = await supabase
-      .from("support_messages")
-      .insert({
-        ticket_id: ticket.id,
-        user_id: user.id,
-        author_type: "user",
-        content,
-      });
-
-    if (messageError) {
-      await supabase.from("support_tickets").delete().eq("id", ticket.id);
-      setMessage(messageError.message || "Não foi possível enviar sua mensagem.");
-      setLoading(false);
-      return;
-    }
-
-    router.push("/suporte/" + ticket.id);
+    router.push("/suporte/" + ticketId);
     router.refresh();
   }
 
