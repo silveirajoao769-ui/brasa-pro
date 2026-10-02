@@ -38,6 +38,9 @@ export default async function LoginPage() {
           <h2>Acesse sua conta</h2>
           <p>Use o e-mail e a senha cadastrados no Brasa Pro.</p>
           <AuthForm mode="login" />
+          <div className="auth-recovery-link">
+            <Link href="/esqueci-senha">Esqueci minha senha</Link>
+          </div>
           <div className="auth-switch">
             Ainda não tem conta? <Link href="/cadastro">Criar conta grátis</Link>
           </div>
