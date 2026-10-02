@@ -90,44 +90,70 @@ export default function AuthForm({ mode }: AuthFormProps) {
   }
 
   return (
-    <form className="auth-form" onSubmit={handleSubmit}>
+    <form className={mode === "signup" ? "auth-form signup-reference-form" : "auth-form"} onSubmit={handleSubmit}>
       {mode === "signup" && (
         <>
-          <label>
-            Seu nome
-            <input name="fullName" type="text" placeholder="Como devemos te chamar?" autoComplete="name" />
+          <label className="signup-field">
+            <span className="signup-field-label">Seu nome</span>
+            <div className="signup-input-shell">
+              <span className="signup-field-icon">○</span>
+              <input name="fullName" type="text" placeholder="Como devemos te chamar?" autoComplete="name" />
+            </div>
           </label>
 
-          <label>
-            Como você vai usar o Brasa Pro?
-            <select value={accountType} onChange={(e) => setAccountType(e.target.value)}>
-              <option value="consumer">Vou fazer churrascos</option>
-              <option value="professional">Trabalho com churrasco</option>
-              <option value="supplier">Sou açougue / fornecedor</option>
-            </select>
+          <label className="signup-field">
+            <span className="signup-field-label">Como você vai usar o Brasa Pro?</span>
+            <div className="signup-input-shell signup-select-shell">
+              <span className="signup-field-icon">♨</span>
+              <select value={accountType} onChange={(e) => setAccountType(e.target.value)}>
+                <option value="consumer">Vou fazer churrascos</option>
+                <option value="professional">Trabalho com churrasco</option>
+                <option value="supplier">Sou açougue / fornecedor</option>
+              </select>
+            </div>
           </label>
         </>
       )}
 
-      <label>
-        E-mail
-        <input name="email" type="email" placeholder="voce@email.com" autoComplete="email" />
+      <label className={mode === "signup" ? "signup-field" : undefined}>
+        {mode === "signup" ? <span className="signup-field-label">E-mail</span> : "E-mail"}
+        {mode === "signup" ? (
+          <div className="signup-input-shell">
+            <span className="signup-field-icon">✉</span>
+            <input name="email" type="email" placeholder="voce@email.com" autoComplete="email" />
+          </div>
+        ) : (
+          <input name="email" type="email" placeholder="voce@email.com" autoComplete="email" />
+        )}
       </label>
 
-      <label>
-        Senha
-        <input
-          name="password"
-          type="password"
-          placeholder={mode === "signup" ? "Mínimo de 8 caracteres" : "Sua senha"}
-          minLength={mode === "signup" ? 8 : 6}
-          autoComplete={mode === "signup" ? "new-password" : "current-password"}
-        />
+      <label className={mode === "signup" ? "signup-field" : undefined}>
+        {mode === "signup" ? <span className="signup-field-label">Senha</span> : "Senha"}
+        {mode === "signup" ? (
+          <div className="signup-input-shell">
+            <span className="signup-field-icon">▣</span>
+            <input
+              name="password"
+              type="password"
+              placeholder="Mínimo de 8 caracteres"
+              minLength={8}
+              autoComplete="new-password"
+            />
+          </div>
+        ) : (
+          <input
+            name="password"
+            type="password"
+            placeholder="Sua senha"
+            minLength={6}
+            autoComplete="current-password"
+          />
+        )}
       </label>
 
       {message && <div className="auth-message">{message}</div>}
 
-      <button className="primary-button wide" disabled={loading} type="submit">
+      <button className={mode === "signup" ? "primary-button wide signup-reference-submit" : "primary-button wide"} disabled={loading} type="submit">
         {loading
           ? "Aguarde..."
           : mode === "signup"
