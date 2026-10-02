@@ -3,6 +3,7 @@
 import { FormEvent, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
+import { formatTaxId, isValidTaxId } from "@/lib/br-tax-id";
 
 type Props = {
   initial: {
@@ -18,6 +19,7 @@ type Props = {
     zip_code: string | null;
     professional_bio: string | null;
     logo_url: string | null;
+    account_type: string;
   };
 };
 
@@ -25,6 +27,7 @@ export default function ProfessionalSettingsForm({ initial }: Props) {
   const router = useRouter();
   const fileRef = useRef<HTMLInputElement>(null);
   const [logoUrl, setLogoUrl] = useState(initial.logo_url || "");
+  const [taxId, setTaxId] = useState(formatTaxId(initial.tax_id || ""));
   const [uploading, setUploading] = useState(false);
   const [saving, setSaving] = useState(false);
   const [message, setMessage] = useState("");
@@ -88,6 +91,12 @@ export default function ProfessionalSettingsForm({ initial }: Props) {
       return;
     }
 
+    if (initial.account_type === "professional" && !isValidTaxId(taxId)) {
+      setMessage("Informe um CPF ou CNPJ válido para a conta profissional.");
+      setSaving(false);
+      return;
+    }
+
     const payload = {
       full_name: String(form.get("fullName") || "").trim() || null,
       business_name: String(form.get("businessName") || "").trim() || null,
@@ -96,7 +105,7 @@ export default function ProfessionalSettingsForm({ initial }: Props) {
       instagram: String(form.get("instagram") || "").trim() || null,
       city: String(form.get("city") || "").trim() || null,
       state: String(form.get("state") || "").trim().toUpperCase() || null,
-      tax_id: String(form.get("taxId") || "").trim() || null,
+      tax_id: taxId.trim() || null,
       address_line: String(form.get("addressLine") || "").trim() || null,
       zip_code: String(form.get("zipCode") || "").trim() || null,
       professional_bio: String(form.get("professionalBio") || "").trim() || null,
@@ -177,8 +186,15 @@ export default function ProfessionalSettingsForm({ initial }: Props) {
               <input name="businessName" defaultValue={initial.business_name || ""} placeholder="Ex.: Brasa do João" />
             </label>
             <label>
-              CPF/CNPJ
-              <input name="taxId" defaultValue={initial.tax_id || ""} placeholder="Somente para identificação comercial" />
+              CPF/CNPJ {initial.account_type === "professional" ? "*" : ""}
+              <input
+                name="taxId"
+                inputMode="numeric"
+                value={taxId}
+                onChange={(event) => setTaxId(formatTaxId(event.target.value))}
+                placeholder={initial.account_type === "professional" ? "Obrigatório para conta profissional" : "CPF ou CNPJ"}
+                required={initial.account_type === "professional"}
+              />
             </label>
             <label>
               Instagram
