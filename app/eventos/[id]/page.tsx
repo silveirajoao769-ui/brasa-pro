@@ -4,6 +4,8 @@ import EventCostForm from "@/components/EventCostForm";
 import EventTaskToggle from "@/components/EventTaskToggle";
 import EventPaymentForm from "@/components/EventPaymentForm";
 import EventPaymentActions from "@/components/EventPaymentActions";
+import EventTeamAssignmentForm from "@/components/EventTeamAssignmentForm";
+import EventTeamStatusSelect from "@/components/EventTeamStatusSelect";
 import QuoteForm from "@/components/QuoteForm";
 import { createClient } from "@/lib/supabase/server";
 import { requirePro } from "@/lib/subscription";
@@ -56,7 +58,7 @@ export default async function EventDetailPage({ params }: PageProps) {
 
   if (!event) notFound();
 
-  const [{ data: costs }, clientResult, quoteResult, { data: tasks }, { data: payments }] = await Promise.all([
+  const [{ data: costs }, clientResult, quoteResult, { data: tasks }, { data: payments }, { data: teamMembers }, { data: teamAssignments }] = await Promise.all([
     supabase
       .from("event_costs")
       .select("id, category, description, amount, created_at")
@@ -91,6 +93,18 @@ export default async function EventDetailPage({ params }: PageProps) {
       .eq("event_id", id)
       .eq("user_id", user.id)
       .order("due_date", { ascending: true, nullsFirst: false })
+      .order("created_at", { ascending: true }),
+    supabase
+      .from("team_members")
+      .select("id, name, default_role, default_daily_rate, active")
+      .eq("user_id", user.id)
+      .eq("active", true)
+      .order("name"),
+    supabase
+      .from("event_team_assignments")
+      .select("id, member_id, role, daily_rate, days, start_time, end_time, status, notes")
+      .eq("event_id", id)
+      .eq("user_id", user.id)
       .order("created_at", { ascending: true }),
   ]);
 
@@ -132,6 +146,25 @@ export default async function EventDetailPage({ params }: PageProps) {
     other: "Outro",
   };
 
+  const teamMemberRows = teamMembers || [];
+  const teamAssignmentRows = teamAssignments || [];
+  const teamMemberMap = new Map(teamMemberRows.map((member) => [member.id, member]));
+  const confirmedTeam = teamAssignmentRows.filter((assignment) =>
+    ["confirmed", "completed"].includes(assignment.status),
+  );
+  const teamCost = confirmedTeam.reduce(
+    (sum, assignment) =>
+      sum + Number(assignment.daily_rate || 0) * Number(assignment.days || 1),
+    0,
+  );
+
+  const teamStatusLabels: Record<string, string> = {
+    invited: "Convidado",
+    confirmed: "Confirmado",
+    declined: "Recusou",
+    completed: "Concluído",
+  };
+
   return (
     <main className="detail-page">
       <div className="shell detail-topbar">
@@ -140,6 +173,7 @@ export default async function EventDetailPage({ params }: PageProps) {
           <span><b>Brasa <i>Pro</i></b><small>EVENTO PROFISSIONAL</small></span>
         </Link>
         <div className="detail-actions">
+          <Link href="/equipe" className="ghost-button">Equipe</Link>
           <Link href="/agenda" className="ghost-button">Agenda</Link>
           <Link href="/clientes" className="ghost-button">Clientes</Link>
           <Link href="/eventos" className="primary-button compact">← Eventos</Link>
@@ -322,6 +356,105 @@ export default async function EventDetailPage({ params }: PageProps) {
             <EventCostForm eventId={event.id} />
           </article>
         </div>
+
+        <article className="detail-panel event-team-panel">
+          <div className="panel-heading">
+            <div>
+              <small>EQUIPE DO EVENTO</small>
+              <h2>Escala e diárias</h2>
+            </div>
+            <Link href="/equipe" className="ghost-button">Gerenciar equipe</Link>
+          </div>
+
+          <div className="event-team-summary">
+            <div>
+              <small>ESCALADOS</small>
+              <strong>{teamAssignmentRows.length}</strong>
+              <span>Total no evento</span>
+            </div>
+            <div>
+              <small>CONFIRMADOS</small>
+              <strong>{confirmedTeam.length}</strong>
+              <span>Entram no custo automaticamente</span>
+            </div>
+            <div>
+              <small>CUSTO DA EQUIPE</small>
+              <strong>{money(teamCost)}</strong>
+              <span>Confirmados e concluídos</span>
+            </div>
+          </div>
+
+          <div className="event-team-layout">
+            <div>
+              {teamAssignmentRows.length === 0 ? (
+                <div className="compact-empty">
+                  <span>👥</span>
+                  <b>Ninguém escalado ainda</b>
+                  <p>Adicione churrasqueiros, auxiliares, garçons ou outros profissionais.</p>
+                </div>
+              ) : (
+                <div className="event-team-list">
+                  {teamAssignmentRows.map((assignment) => {
+                    const member = teamMemberMap.get(assignment.member_id);
+                    const assignmentCost =
+                      Number(assignment.daily_rate || 0) * Number(assignment.days || 1);
+
+                    return (
+                      <div
+                        className={
+                          assignment.status === "declined"
+                            ? "event-team-row declined"
+                            : assignment.status === "confirmed" || assignment.status === "completed"
+                              ? "event-team-row confirmed"
+                              : "event-team-row"
+                        }
+                        key={assignment.id}
+                      >
+                        <div className="record-avatar">
+                          {(member?.name || "EQ").slice(0, 2).toUpperCase()}
+                        </div>
+                        <div className="event-team-main">
+                          <b>{member?.name || "Profissional"}</b>
+                          <span>
+                            {assignment.role}
+                            {assignment.start_time ? " · " + String(assignment.start_time).slice(0, 5) : ""}
+                            {assignment.end_time ? "–" + String(assignment.end_time).slice(0, 5) : ""}
+                          </span>
+                          <small>
+                            {Number(assignment.days || 1).toLocaleString("pt-BR")} diária(s) · {teamStatusLabels[assignment.status] || assignment.status}
+                          </small>
+                        </div>
+                        <div className="event-team-cost">
+                          <small>CUSTO</small>
+                          <strong>{money(assignmentCost)}</strong>
+                        </div>
+                        <EventTeamStatusSelect
+                          assignmentId={assignment.id}
+                          status={assignment.status}
+                        />
+                      </div>
+                    );
+                  })}
+                </div>
+              )}
+            </div>
+
+            <div className="event-team-form-panel">
+              <div className="panel-heading compact-heading">
+                <div><small>NOVA ESCALA</small><h3>Adicionar profissional</h3></div>
+              </div>
+              <EventTeamAssignmentForm
+                eventId={event.id}
+                members={teamMemberRows.map((member) => ({
+                  id: member.id,
+                  name: member.name,
+                  default_role: member.default_role,
+                  default_daily_rate: Number(member.default_daily_rate || 0),
+                }))}
+              />
+            </div>
+          </div>
+        </article>
 
         <article className="detail-panel event-task-panel">
           <div className="panel-heading">
