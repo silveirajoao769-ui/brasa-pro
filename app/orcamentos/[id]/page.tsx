@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
 import ShareQuoteActions from "@/components/ShareQuoteActions";
+import ShareContractActions from "@/components/ShareContractActions";
 import { createClient } from "@/lib/supabase/server";
 import { requirePro } from "@/lib/subscription";
 
@@ -52,7 +53,7 @@ export default async function QuotePage({ params }: PageProps) {
 
   if (!event) notFound();
 
-  const [{ data: client }, { data: costs }] = await Promise.all([
+  const [{ data: client }, { data: costs }, { data: contract }] = await Promise.all([
     event.client_id
       ? supabase
           .from("clients")
@@ -66,6 +67,11 @@ export default async function QuotePage({ params }: PageProps) {
       .select("category, description, amount")
       .eq("event_id", event.id)
       .order("created_at", { ascending: true }),
+    supabase
+      .from("contracts")
+      .select("id, public_token, status, accepted_name, accepted_at")
+      .eq("quote_id", quote.id)
+      .maybeSingle(),
   ]);
 
   const price = Number(quote.price_total || 0);
@@ -97,6 +103,22 @@ export default async function QuotePage({ params }: PageProps) {
           status={quote.status}
         />
       </div>
+
+      {contract && (
+        <div className="shell quote-owner-actions contract-owner-actions">
+          <div>
+            <span className="eyebrow">CONTRATO DIGITAL</span>
+            <h2>O contrato foi gerado a partir da proposta aprovada.</h2>
+            <p>
+              Status: <b>{contract.status === "accepted" ? "aceito pelo cliente" : "aguardando aceite"}</b>
+            </p>
+          </div>
+          <ShareContractActions
+            publicToken={contract.public_token}
+            status={contract.status}
+          />
+        </div>
+      )}
 
       <section className="quote-document">
         <div className="quote-document-header">
