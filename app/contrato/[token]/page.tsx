@@ -20,7 +20,14 @@ type ContractSnapshot = {
   client_phone?: string | null;
   client_email?: string | null;
   provider_name?: string | null;
+  provider_business_name?: string | null;
   provider_phone?: string | null;
+  provider_email?: string | null;
+  provider_instagram?: string | null;
+  provider_logo_url?: string | null;
+  provider_tax_id?: string | null;
+  provider_address?: string | null;
+  provider_zip_code?: string | null;
   provider_city?: string | null;
   provider_state?: string | null;
   service_package?: {
@@ -105,11 +112,35 @@ export default async function PublicContractPage({ params }: PageProps) {
           </div>
           <div>
             <small>CONTRATADO</small>
-            <strong>{snapshot.provider_name || "Profissional Brasa Pro"}</strong>
+            <strong>{snapshot.provider_business_name || snapshot.provider_name || "Profissional Brasa Pro"}</strong>
           </div>
           <div>
             <small>VALOR APROVADO</small>
             <strong>{money(Number(snapshot.price_total || 0))}</strong>
+          </div>
+        </div>
+
+        <div className="public-provider-card contract-provider-card">
+          <div className="public-provider-logo">
+            {snapshot.provider_logo_url ? (
+              <img src={snapshot.provider_logo_url} alt={snapshot.provider_business_name || snapshot.provider_name || "Logo"} />
+            ) : (
+              <span>🔥</span>
+            )}
+          </div>
+          <div className="public-provider-main">
+            <small>PRESTADOR</small>
+            <b>{snapshot.provider_business_name || snapshot.provider_name || "Profissional Brasa Pro"}</b>
+            <span>
+              {[snapshot.provider_phone, snapshot.provider_email, snapshot.provider_instagram]
+                .filter(Boolean)
+                .join(" · ") || "Contato não informado"}
+            </span>
+          </div>
+          <div className="public-provider-location">
+            <small>IDENTIFICAÇÃO</small>
+            <b>{snapshot.provider_tax_id || providerLocation || "Dados não informados"}</b>
+            {snapshot.provider_address && <span>{snapshot.provider_address}</span>}
           </div>
         </div>
 
@@ -221,8 +252,8 @@ export default async function PublicContractPage({ params }: PageProps) {
           </div>
           <div>
             <small>CONTRATADO</small>
-            <b>{snapshot.provider_name || "Profissional Brasa Pro"}</b>
-            <span>{snapshot.provider_phone || providerLocation || "Contato não informado"}</span>
+            <b>{snapshot.provider_business_name || snapshot.provider_name || "Profissional Brasa Pro"}</b>
+            <span>{snapshot.provider_phone || snapshot.provider_email || providerLocation || "Contato não informado"}</span>
           </div>
         </div>
 
