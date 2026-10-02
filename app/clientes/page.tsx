@@ -3,6 +3,7 @@ import { redirect } from "next/navigation";
 import ClientForm from "@/components/ClientForm";
 import ClientDeleteButton from "@/components/ClientDeleteButton";
 import { createClient } from "@/lib/supabase/server";
+import { requirePro } from "@/lib/subscription";
 
 export const dynamic = "force-dynamic";
 
@@ -11,6 +12,7 @@ export default async function ClientsPage() {
   const { data: { user } } = await supabase.auth.getUser();
 
   if (!user) redirect("/login");
+  await requirePro(supabase, user.id, "Clientes e CRM");
 
   const { data: clients } = await supabase
     .from("clients")
