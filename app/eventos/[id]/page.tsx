@@ -2,6 +2,8 @@ import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
 import EventCostForm from "@/components/EventCostForm";
 import EventTaskToggle from "@/components/EventTaskToggle";
+import EventPaymentForm from "@/components/EventPaymentForm";
+import EventPaymentActions from "@/components/EventPaymentActions";
 import QuoteForm from "@/components/QuoteForm";
 import { createClient } from "@/lib/supabase/server";
 import { requirePro } from "@/lib/subscription";
@@ -54,7 +56,7 @@ export default async function EventDetailPage({ params }: PageProps) {
 
   if (!event) notFound();
 
-  const [{ data: costs }, clientResult, quoteResult, { data: tasks }] = await Promise.all([
+  const [{ data: costs }, clientResult, quoteResult, { data: tasks }, { data: payments }] = await Promise.all([
     supabase
       .from("event_costs")
       .select("id, category, description, amount, created_at")
@@ -83,6 +85,13 @@ export default async function EventDetailPage({ params }: PageProps) {
       .eq("user_id", user.id)
       .order("completed", { ascending: true })
       .order("due_at", { ascending: true, nullsFirst: false }),
+    supabase
+      .from("event_payments")
+      .select("id, kind, description, amount, due_date, status, paid_at, payment_method, notes, created_at")
+      .eq("event_id", id)
+      .eq("user_id", user.id)
+      .order("due_date", { ascending: true, nullsFirst: false })
+      .order("created_at", { ascending: true }),
   ]);
 
   const client = clientResult.data;
@@ -93,6 +102,35 @@ export default async function EventDetailPage({ params }: PageProps) {
   const margin = revenue > 0 ? (profit / revenue) * 100 : 0;
   const costPerGuest = event.guests > 0 ? totalCosts / event.guests : 0;
   const pricePerGuest = event.guests > 0 ? revenue / event.guests : 0;
+  const paymentRows = payments || [];
+  const activePayments = paymentRows.filter((payment) => payment.status !== "cancelled");
+  const receivedAmount = activePayments
+    .filter((payment) => payment.status === "paid")
+    .reduce((sum, payment) => sum + Number(payment.amount || 0), 0);
+  const scheduledAmount = activePayments.reduce(
+    (sum, payment) => sum + Number(payment.amount || 0),
+    0,
+  );
+  const pendingAmount = activePayments
+    .filter((payment) => payment.status === "pending")
+    .reduce((sum, payment) => sum + Number(payment.amount || 0), 0);
+  const remainingToSchedule = Math.max(0, revenue - scheduledAmount);
+  const remainingToReceive = Math.max(0, revenue - receivedAmount);
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+  const overduePayments = activePayments.filter(
+    (payment) =>
+      payment.status === "pending" &&
+      payment.due_date &&
+      new Date(payment.due_date + "T12:00:00") < today,
+  );
+
+  const paymentKindLabels: Record<string, string> = {
+    signal: "Sinal",
+    installment: "Parcela",
+    balance: "Saldo final",
+    other: "Outro",
+  };
 
   return (
     <main className="detail-page">
@@ -139,6 +177,114 @@ export default async function EventDetailPage({ params }: PageProps) {
             <strong>{margin.toFixed(1)}%</strong>
           </div>
         </div>
+
+        <article className="detail-panel event-receivables-panel">
+          <div className="panel-heading">
+            <div>
+              <small>COBRANÇAS E RECEBIMENTOS</small>
+              <h2>Quanto já entrou?</h2>
+            </div>
+            <Link href="/financeiro" className="ghost-button">Ver financeiro</Link>
+          </div>
+
+          <div className="receivable-summary-grid">
+            <div>
+              <small>VALOR DO EVENTO</small>
+              <strong>{money(revenue)}</strong>
+              <span>Receita contratada</span>
+            </div>
+            <div className="receivable-success">
+              <small>RECEBIDO</small>
+              <strong>{money(receivedAmount)}</strong>
+              <span>{revenue > 0 ? ((receivedAmount / revenue) * 100).toFixed(0) : "0"}% do evento</span>
+            </div>
+            <div>
+              <small>A RECEBER</small>
+              <strong>{money(remainingToReceive)}</strong>
+              <span>{pendingAmount > 0 ? money(pendingAmount) + " já programados" : "Sem cobranças pendentes"}</span>
+            </div>
+            <div className={overduePayments.length > 0 ? "receivable-danger" : ""}>
+              <small>VENCIDOS</small>
+              <strong>{overduePayments.length}</strong>
+              <span>{overduePayments.length > 0 ? "Cobranças atrasadas" : "Tudo em dia"}</span>
+            </div>
+          </div>
+
+          <div className="receivable-layout">
+            <div>
+              <div className="panel-heading compact-heading">
+                <div><small>CRONOGRAMA</small><h3>Cobranças do evento</h3></div>
+                <span className="list-count">{activePayments.length} ativas</span>
+              </div>
+
+              {paymentRows.length === 0 ? (
+                <div className="compact-empty">
+                  <span>💰</span>
+                  <b>Nenhuma cobrança cadastrada</b>
+                  <p>Crie um sinal, parcelas ou saldo final para acompanhar o que já recebeu.</p>
+                </div>
+              ) : (
+                <div className="receivable-list">
+                  {paymentRows.map((payment) => {
+                    const isOverdue =
+                      payment.status === "pending" &&
+                      payment.due_date &&
+                      new Date(payment.due_date + "T12:00:00") < today;
+
+                    return (
+                      <div
+                        className={
+                          payment.status === "cancelled"
+                            ? "receivable-row cancelled"
+                            : isOverdue
+                              ? "receivable-row overdue"
+                              : payment.status === "paid"
+                                ? "receivable-row paid"
+                                : "receivable-row"
+                        }
+                        key={payment.id}
+                      >
+                        <div className="receivable-type">
+                          <span>{paymentKindLabels[payment.kind] || payment.kind}</span>
+                          <b>{payment.description || paymentKindLabels[payment.kind] || "Cobrança"}</b>
+                          <small>
+                            {payment.due_date
+                              ? "Vence em " + new Intl.DateTimeFormat("pt-BR").format(new Date(payment.due_date + "T12:00:00"))
+                              : "Sem vencimento"}
+                          </small>
+                        </div>
+                        <div className="receivable-value">
+                          <strong>{money(Number(payment.amount))}</strong>
+                          <small>
+                            {payment.status === "paid"
+                              ? "Recebido"
+                              : payment.status === "cancelled"
+                                ? "Cancelado"
+                                : isOverdue
+                                  ? "Vencido"
+                                  : "Pendente"}
+                          </small>
+                        </div>
+                        <EventPaymentActions
+                          paymentId={payment.id}
+                          status={payment.status}
+                          paymentMethod={payment.payment_method}
+                        />
+                      </div>
+                    );
+                  })}
+                </div>
+              )}
+            </div>
+
+            <div className="receivable-form-panel">
+              <div className="panel-heading compact-heading">
+                <div><small>NOVA COBRANÇA</small><h3>Programar recebimento</h3></div>
+              </div>
+              <EventPaymentForm eventId={event.id} remaining={remainingToSchedule} />
+            </div>
+          </div>
+        </article>
 
         <div className="detail-grid">
           <article className="detail-panel">
