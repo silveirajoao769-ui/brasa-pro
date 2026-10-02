@@ -526,6 +526,17 @@ footer { border-top: 1px solid var(--line); padding: 30px 0; }
   display: flex; gap: 10px; align-items: center;
   color: #89929b; font-size: 13px;
 }
+.nav-pro-tag {
+  margin-left: auto;
+  padding: 3px 6px;
+  border: 1px solid rgba(255,106,0,.28);
+  border-radius: 999px;
+  color: var(--orange);
+  background: rgba(255,106,0,.08);
+  font-size: 7px;
+  font-weight: 900;
+  letter-spacing: .7px;
+}
 .app-sidebar nav a.active,
 .app-sidebar nav a:hover {
   color: white;
