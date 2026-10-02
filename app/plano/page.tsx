@@ -20,6 +20,7 @@ const proFeatures = [
   "Eventos profissionais",
   "Agenda, prazos e checklist operacional",
   "Custos, lucro e margem",
+  "Cobranças, sinal e contas a receber",
   "Orçamentos com aprovação online",
   "Contrato digital com aceite eletrônico",
   "Estoque e movimentações",
