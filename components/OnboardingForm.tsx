@@ -28,7 +28,7 @@ export default function OnboardingForm({
 
   const destination = useMemo(() => {
     if (accountType === "professional") return "/plano?feature=Operação%20profissional";
-    if (accountType === "supplier") return "/plano?feature=Portal%20do%20fornecedor";
+    if (accountType === "supplier") return "/em-breve?feature=Marketplace";
     return "/planejar";
   }, [accountType]);
 
