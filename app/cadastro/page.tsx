@@ -12,36 +12,55 @@ export default async function CadastroPage() {
   if (user) redirect("/dashboard");
 
   return (
-    <main className="auth-page">
-      <section className="auth-shell">
-        <div className="auth-brand-side">
-          <Link href="/" className="brand">
-            <span className="brand-flame">🔥</span>
-            <span><b>Brasa <i>Pro</i></b><small>PLANEJE · COMPRE · COZINHE · LUCRE</small></span>
+    <main className="auth-page signup-reference-page">
+      <div className="signup-fire-orb signup-fire-orb-one" />
+      <div className="signup-fire-orb signup-fire-orb-two" />
+      <div className="signup-ember e1" />
+      <div className="signup-ember e2" />
+      <div className="signup-ember e3" />
+
+      <section className="signup-reference-shell">
+        <header className="signup-reference-header">
+          <Link href="/" className="signup-reference-brand">
+            <span className="signup-reference-logo">🔥</span>
+            <div>
+              <b>Brasa<span>Pro</span></b>
+              <small>PLANEJE · CALCULE · VENDA · CRESÇA</small>
+            </div>
           </Link>
+        </header>
 
-          <div>
-            <span className="eyebrow">COMECE GRÁTIS</span>
-            <h1>Seu churrasco começa antes da primeira brasa.</h1>
-            <p>Crie sua conta e transforme planejamento em quantidade certa, menos desperdício e mais resultado.</p>
-          </div>
+        <div className="signup-reference-copy">
+          <span className="signup-reference-line" />
+          <span className="eyebrow">COMECE AGORA</span>
+          <h1>Crie sua <span>conta</span></h1>
+          <p>Entre para o Brasa Pro e leve seu churrasco para o próximo nível.</p>
 
-          <div className="auth-benefits">
-            <span>✓ Calculadora inteligente</span>
-            <span>✓ Lista de compras</span>
-            <span>✓ Ferramentas para profissionais</span>
+          <div className="signup-reference-features">
+            <article>
+              <span>▣</span>
+              <div><b>Calculadora</b><small>inteligente</small></div>
+            </article>
+            <article>
+              <span>🛒</span>
+              <div><b>Lista de</b><small>compras</small></div>
+            </article>
+            <article>
+              <span>▥</span>
+              <div><b>Ferramentas</b><small>para profissionais</small></div>
+            </article>
           </div>
         </div>
 
-        <div className="auth-card">
-          <span className="eyebrow">CRIAR CONTA</span>
-          <h2>Entre para o Brasa Pro</h2>
-          <p>Escolha seu perfil. Você poderá mudar suas informações depois.</p>
+        <section className="signup-reference-form-card">
           <AuthForm mode="signup" />
-          <div className="auth-switch">
+          <div className="auth-switch signup-reference-switch">
             Já tem uma conta? <Link href="/login">Entrar</Link>
           </div>
-        </div>
+          <p className="signup-reference-legal">
+            Ao criar sua conta, você concorda com nossos <Link href="/termos">Termos de Uso</Link> e <Link href="/privacidade">Política de Privacidade</Link>.
+          </p>
+        </section>
       </section>
     </main>
   );
