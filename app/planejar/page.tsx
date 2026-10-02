@@ -9,7 +9,10 @@ export default function PlanejarPage() {
           <span className="brand-flame">🔥</span>
           <span><b>Brasa <i>Pro</i></b><small>PLANEJAMENTO INTELIGENTE</small></span>
         </Link>
-        <Link href="/dashboard" className="ghost-button">Ir para o dashboard</Link>
+        <div className="detail-actions">
+          <Link href="/ia-brasa?mode=planner" className="ghost-button">✦ IA Brasa</Link>
+          <Link href="/dashboard" className="ghost-button">Ir para o dashboard</Link>
+        </div>
       </div>
 
       <section className="shell planner-workspace">
@@ -17,19 +20,19 @@ export default function PlanejarPage() {
           <span className="eyebrow">NOVO CHURRASCO</span>
           <h1>Comece pelo básico. A gente calcula o resto.</h1>
           <p>
-            Esta é a primeira versão funcional do nosso planejador. Depois vamos acrescentar
-            adultos, crianças, duração, cortes, bebidas, restrições e fornecedores.
+            Informe convidados, duração, orçamento e preferências. O Brasa Pro calcula quantidades
+            e organiza a lista de compras para você.
           </p>
         </div>
         <QuickPlanner />
 
         <div className="next-build-card">
           <div>
-            <span className="eyebrow">PRÓXIMA EVOLUÇÃO</span>
-            <h2>Planejamento detalhado</h2>
-            <p>Adultos e crianças · duração · cortes · bebidas · acompanhamentos · lista de compras.</p>
+            <span className="eyebrow">QUER DESCREVER EM TEXTO?</span>
+            <h2>Planeje com a IA Brasa</h2>
+            <p>Escreva como imagina o churrasco e deixe a IA interpretar suas preferências antes do motor calcular as quantidades.</p>
           </div>
-          <span className="build-badge">EM CONSTRUÇÃO</span>
+          <Link href="/ia-brasa?mode=planner" className="primary-button compact">Abrir IA Brasa →</Link>
         </div>
       </section>
     </main>
