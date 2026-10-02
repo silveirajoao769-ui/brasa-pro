@@ -191,6 +191,7 @@ export default async function EventDetailPage({ params }: PageProps) {
           <span><b>Brasa <i>Pro</i></b><small>EVENTO PROFISSIONAL</small></span>
         </Link>
         <div className="detail-actions">
+          <Link href={"/ia-brasa?mode=event&eventId=" + event.id} className="ghost-button">✦ Analisar evento</Link>
           <Link href="/equipe" className="ghost-button">Equipe</Link>
           <Link href="/agenda" className="ghost-button">Agenda</Link>
           <Link href="/clientes" className="ghost-button">Clientes</Link>
