@@ -3,6 +3,7 @@
 import { FormEvent, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
+import { formatTaxId, isValidTaxId } from "@/lib/br-tax-id";
 
 type AuthFormProps = {
   mode: "login" | "signup";
@@ -53,6 +54,7 @@ export default function AuthForm({ mode }: AuthFormProps) {
   const [accountType, setAccountType] = useState("consumer");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
+  const [taxId, setTaxId] = useState("");
 
   const passwordStrength = useMemo(() => {
     if (!password) return 0;
@@ -84,6 +86,12 @@ export default function AuthForm({ mode }: AuthFormProps) {
       return;
     }
 
+    if (mode === "signup" && accountType === "professional" && !isValidTaxId(taxId)) {
+      setMessage("Informe um CPF ou CNPJ válido para criar uma conta profissional.");
+      setLoading(false);
+      return;
+    }
+
     if (mode === "signup") {
       const emailRedirectTo =
         window.location.origin + "/auth/callback?next=" + encodeURIComponent("/dashboard");
@@ -96,6 +104,7 @@ export default function AuthForm({ mode }: AuthFormProps) {
           data: {
             full_name: fullName,
             account_type: accountType,
+            tax_id: accountType === "professional" ? taxId : null,
           },
         },
       });
@@ -163,12 +172,13 @@ export default function AuthForm({ mode }: AuthFormProps) {
 
             <button
               type="button"
-              className={accountType === "supplier" ? "signup-persona-option active" : "signup-persona-option"}
-              onClick={() => setAccountType("supplier")}
+              className="signup-persona-option coming-soon"
+              disabled
+              aria-disabled="true"
             >
               <span className="persona-mini-icon">▣</span>
               <b>Sou fornecedor</b>
-              <small>Açougue ou parceiro</small>
+              <small>Em breve</small>
             </button>
           </div>
         </fieldset>
@@ -198,6 +208,24 @@ export default function AuthForm({ mode }: AuthFormProps) {
             />
           </div>
         </label>
+
+        {accountType === "professional" && (
+          <label className="signup-field">
+            <span>CPF ou CNPJ</span>
+            <div className="signup-input-wrap">
+              <i><FieldIcon kind="user" /></i>
+              <input
+                name="taxId"
+                type="text"
+                inputMode="numeric"
+                value={taxId}
+                onChange={(event) => setTaxId(formatTaxId(event.target.value))}
+                placeholder="Obrigatório para conta profissional"
+                autoComplete="off"
+              />
+            </div>
+          </label>
+        )}
 
         <label className="signup-field">
           <span>Senha</span>
