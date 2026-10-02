@@ -2,6 +2,7 @@ import Link from "next/link";
 import { redirect } from "next/navigation";
 import InventoryItemForm from "@/components/InventoryItemForm";
 import InventoryMovementForm from "@/components/InventoryMovementForm";
+import InventoryItemEditor from "@/components/InventoryItemEditor";
 import { createClient } from "@/lib/supabase/server";
 import { requirePro } from "@/lib/subscription";
 
@@ -24,7 +25,7 @@ export default async function InventoryPage() {
   const [{ data: items }, { data: suppliers }, { data: movements }] = await Promise.all([
     supabase
       .from("inventory_items")
-      .select("id, name, category, unit, quantity, min_quantity, average_unit_cost, preferred_supplier_id, updated_at")
+      .select("id, name, category, unit, quantity, min_quantity, average_unit_cost, preferred_supplier_id, notes, updated_at")
       .eq("user_id", user.id)
       .order("name"),
     supabase
@@ -173,6 +174,7 @@ export default async function InventoryPage() {
                         <strong>{money(value)}</strong>
                         <small>{money(Number(item.average_unit_cost))}/{item.unit}</small>
                       </div>
+                      <InventoryItemEditor item={item} suppliers={suppliers || []} />
                     </div>
                   );
                 })}
