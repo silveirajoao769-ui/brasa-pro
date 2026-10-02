@@ -1,9 +1,13 @@
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
+import { redirect } from "next/navigation";
+import { isMarketplaceEnabled } from "@/lib/features";
 
 export const dynamic = "force-dynamic";
 
 export default async function PartnersPage() {
+  if (!isMarketplaceEnabled()) redirect("/em-breve?feature=Marketplace");
+
   const supabase = await createClient();
 
   const { data: partners } = await supabase
