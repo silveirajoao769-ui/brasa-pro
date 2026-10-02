@@ -5,6 +5,7 @@ import PartnerProductForm from "@/components/PartnerProductForm";
 import PartnerProductEditor from "@/components/PartnerProductEditor";
 import { createClient } from "@/lib/supabase/server";
 import { requirePro } from "@/lib/subscription";
+import { isMarketplaceEnabled } from "@/lib/features";
 
 export const dynamic = "force-dynamic";
 
@@ -16,6 +17,8 @@ function money(value: number) {
 }
 
 export default async function SupplierPortalPage() {
+  if (!isMarketplaceEnabled()) redirect("/em-breve?feature=Marketplace");
+
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
 
