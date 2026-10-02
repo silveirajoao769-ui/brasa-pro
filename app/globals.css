@@ -8511,3 +8511,206 @@ footer { border-top: 1px solid var(--line); padding: 30px 0; }
     display: none;
   }
 }
+
+
+/* In-app support */
+.support-main-grid {
+  display: grid;
+  grid-template-columns: .82fr 1.18fr;
+  gap: 14px;
+  align-items: start;
+}
+.support-ticket-list {
+  display: grid;
+  gap: 8px;
+  margin-top: 18px;
+}
+.support-ticket-row {
+  min-height: 82px;
+  padding: 11px 12px;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  background: rgba(255,255,255,.014);
+  color: inherit;
+  display: grid;
+  grid-template-columns: auto minmax(0,1fr) 18px;
+  gap: 11px;
+  align-items: center;
+}
+.support-ticket-row:hover {
+  border-color: rgba(255,106,0,.22);
+}
+.support-ticket-row > div {
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+.support-ticket-row small,
+.support-ticket-row span:not(.support-ticket-status) {
+  color: #737c85;
+  font-size: 8px;
+}
+.support-ticket-row b {
+  font-size: 10px;
+}
+.support-ticket-status {
+  min-width: 76px;
+  padding: 6px 8px;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  text-align: center;
+  color: #aab2b9;
+  font-size: 7px;
+  font-weight: 900;
+  text-transform: uppercase;
+}
+.support-ticket-status.open {
+  border-color: rgba(255,106,0,.2);
+  background: rgba(255,106,0,.04);
+  color: var(--orange-2);
+}
+.support-ticket-status.in_progress {
+  border-color: rgba(95,126,255,.22);
+  background: rgba(95,126,255,.04);
+  color: #a9b9ff;
+}
+.support-ticket-status.waiting_user {
+  border-color: rgba(255,190,90,.22);
+  background: rgba(255,190,90,.04);
+  color: #ffd37a;
+}
+.support-ticket-status.resolved,
+.support-ticket-status.closed {
+  border-color: rgba(69,221,130,.18);
+  background: rgba(69,221,130,.035);
+  color: #8ef2b5;
+}
+.support-conversation-panel {
+  max-width: 860px;
+}
+.support-thread {
+  display: grid;
+  gap: 10px;
+  margin: 18px 0;
+}
+.support-message {
+  width: min(82%, 620px);
+  padding: 13px 14px;
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  background: rgba(255,255,255,.014);
+}
+.support-message.user {
+  margin-left: auto;
+  border-color: rgba(255,106,0,.16);
+  background: rgba(255,106,0,.025);
+}
+.support-message.support {
+  margin-right: auto;
+  border-color: rgba(95,126,255,.16);
+  background: rgba(95,126,255,.025);
+}
+.support-message-meta {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 6px;
+}
+.support-message-meta b {
+  font-size: 8px;
+}
+.support-message-meta span {
+  color: #66707a;
+  font-size: 7px;
+}
+.support-message p {
+  margin: 0;
+  color: #c3c9ce;
+  font-size: 10px;
+  line-height: 1.55;
+  white-space: pre-wrap;
+}
+.support-reply-form {
+  margin-top: 18px;
+  padding-top: 16px;
+  border-top: 1px solid var(--line);
+}
+.support-reply-form textarea {
+  width: 100%;
+  min-height: 120px;
+  resize: vertical;
+  border: 1px solid var(--line);
+  border-radius: 11px;
+  background: #090c0f;
+  color: #fff;
+  padding: 12px;
+  outline: none;
+}
+.support-reply-form textarea:focus {
+  border-color: rgba(255,106,0,.55);
+  box-shadow: 0 0 0 3px rgba(255,106,0,.055);
+}
+.support-reply-footer {
+  margin-top: 8px;
+  display: flex;
+  justify-content: space-between;
+  gap: 10px;
+  align-items: center;
+}
+.support-reply-footer small {
+  color: #68717a;
+  font-size: 8px;
+}
+.support-closed-note {
+  margin-top: 18px;
+  padding: 12px 14px;
+  border: 1px solid rgba(69,221,130,.18);
+  border-radius: 11px;
+  background: rgba(69,221,130,.035);
+  display: grid;
+  grid-template-columns: 30px 1fr;
+  gap: 10px;
+  align-items: center;
+}
+.support-closed-note > span {
+  width: 30px;
+  height: 30px;
+  border-radius: 9px;
+  background: rgba(69,221,130,.07);
+  color: #8ef2b5;
+  display: grid;
+  place-items: center;
+}
+.support-closed-note b {
+  font-size: 9px;
+}
+.support-closed-note p {
+  margin: 3px 0 0;
+  color: #737c85;
+  font-size: 8px;
+}
+@media (max-width: 900px) {
+  .support-main-grid {
+    grid-template-columns: 1fr;
+  }
+}
+@media (max-width: 620px) {
+  .support-ticket-row {
+    grid-template-columns: 1fr 18px;
+  }
+  .support-ticket-status {
+    grid-column: 1;
+    width: fit-content;
+  }
+  .support-ticket-row > div {
+    grid-column: 1;
+  }
+  .support-ticket-row .event-arrow {
+    grid-column: 2;
+    grid-row: 1 / span 2;
+  }
+  .support-message {
+    width: 92%;
+  }
+}
