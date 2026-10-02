@@ -111,6 +111,19 @@ export default async function PublicProposalPage({ params }: PageProps) {
 
         <PublicQuoteResponse token={token} status={proposal.quote_status} />
 
+        {proposal.quote_status === "approved" && proposal.contract_token && (
+          <div className="public-contract-cta">
+            <div>
+              <span className="eyebrow">PRÓXIMA ETAPA</span>
+              <h2>Contrato digital disponível</h2>
+              <p>A proposta foi aprovada. Agora revise os termos e registre o aceite do contrato.</p>
+            </div>
+            <Link className="primary-button" href={"/contrato/" + proposal.contract_token}>
+              Abrir contrato →
+            </Link>
+          </div>
+        )}
+
         <div className="public-proposal-footer">
           <span>🔥 Brasa Pro</span>
           <p>Proposta gerada digitalmente pela plataforma Brasa Pro.</p>
