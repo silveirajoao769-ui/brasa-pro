@@ -31,11 +31,21 @@ export default function AuthForm({ mode }: AuthFormProps) {
       return;
     }
 
+    if (mode === "signup" && password.length < 8) {
+      setMessage("Use uma senha com pelo menos 8 caracteres.");
+      setLoading(false);
+      return;
+    }
+
     if (mode === "signup") {
+      const emailRedirectTo =
+        window.location.origin + "/auth/callback?next=" + encodeURIComponent("/dashboard");
+
       const { data, error } = await supabase.auth.signUp({
         email,
         password,
         options: {
+          emailRedirectTo,
           data: {
             full_name: fullName,
             account_type: accountType,
@@ -98,8 +108,8 @@ export default function AuthForm({ mode }: AuthFormProps) {
         <input
           name="password"
           type="password"
-          placeholder="Mínimo de 6 caracteres"
-          minLength={6}
+          placeholder={mode === "signup" ? "Mínimo de 8 caracteres" : "Sua senha"}
+          minLength={mode === "signup" ? 8 : 6}
           autoComplete={mode === "signup" ? "new-password" : "current-password"}
         />
       </label>
