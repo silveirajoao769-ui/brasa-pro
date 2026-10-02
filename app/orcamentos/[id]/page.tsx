@@ -2,6 +2,7 @@ import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
 import ShareQuoteActions from "@/components/ShareQuoteActions";
 import { createClient } from "@/lib/supabase/server";
+import { requirePro } from "@/lib/subscription";
 
 export const dynamic = "force-dynamic";
 
@@ -31,6 +32,7 @@ export default async function QuotePage({ params }: PageProps) {
   const { data: { user } } = await supabase.auth.getUser();
 
   if (!user) redirect("/login");
+  await requirePro(supabase, user.id, "Orçamentos profissionais");
 
   const { data: quote } = await supabase
     .from("quotes")
