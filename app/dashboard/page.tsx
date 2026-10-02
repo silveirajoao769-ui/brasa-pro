@@ -161,6 +161,7 @@ export default async function DashboardPage() {
         <nav>
           <Link className="active" href="/dashboard">⌂ <span>Dashboard</span></Link>
           <Link href="/planejar">✦ <span>Planejamento</span></Link>
+          <Link href="/ia-brasa?mode=planner">✦ <span>IA Brasa</span></Link>
           <Link href="/planejar">▦ <span>Calculadora</span></Link>
           <Link href="/receitas">☷ <span>Receitas</span></Link>
           <Link href="/compras">🛒 <span>Compras</span></Link>
