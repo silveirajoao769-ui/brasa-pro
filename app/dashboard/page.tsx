@@ -164,7 +164,7 @@ export default async function DashboardPage() {
           <Link href="/planejar">▦ <span>Calculadora</span></Link>
           <Link href="/receitas">☷ <span>Receitas</span></Link>
           <Link href="/compras">🛒 <span>Compras</span></Link>
-          <Link href="/pedidos">🧾 <span>Pedidos</span></Link>
+          <Link href="/em-breve?feature=Marketplace">🧾 <span>Pedidos</span><small className="nav-pro-tag">EM BREVE</small></Link>
           <Link href="/clientes">♙ <span>Clientes</span>{!isPro && <small className="nav-pro-tag">PRO</small>}</Link>
           <Link href="/eventos">□ <span>Eventos</span>{!isPro && <small className="nav-pro-tag">PRO</small>}</Link>
           <Link href="/agenda">◷ <span>Agenda</span>{!isPro && <small className="nav-pro-tag">PRO</small>}</Link>
@@ -174,7 +174,7 @@ export default async function DashboardPage() {
           <Link href="/relatorios">▥ <span>Relatórios</span>{!isPro && <small className="nav-pro-tag">PRO</small>}</Link>
           <Link href="/estoque">📦 <span>Estoque</span>{!isPro && <small className="nav-pro-tag">PRO</small>}</Link>
           <Link href="/fornecedores">🚚 <span>Fornecedores</span>{!isPro && <small className="nav-pro-tag">PRO</small>}</Link>
-          <Link href="/fornecedor">🏪 <span>Portal fornecedor</span>{!isPro && <small className="nav-pro-tag">PRO</small>}</Link>
+          <Link href="/em-breve?feature=Marketplace">🏪 <span>Portal fornecedor</span><small className="nav-pro-tag">EM BREVE</small></Link>
           <Link href="/configuracoes">⚙ <span>Configurações</span>{!isPro && <small className="nav-pro-tag">PRO</small>}</Link>
           <Link href="/suporte">? <span>Ajuda e suporte</span></Link>
           <Link href="/plano">💳 <span>Plano</span></Link>
