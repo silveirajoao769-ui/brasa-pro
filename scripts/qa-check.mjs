@@ -60,10 +60,12 @@ assert(billing.includes("body.secret"), "webhook Cakto lê segredo do payload");
 assert(!billing.includes('searchParams.get("key")'), "webhook Cakto não usa segredo na URL");
 
 const aiApi = read("app/api/ai/planner/route.ts");
-assert(aiApi.includes('AI_BRASA_ENABLED !== "true"'), "API da IA permanece atrás de feature flag");
+assert(aiApi.includes("https://api.openai.com/v1/responses"), "IA Brasa usa OpenAI Responses API");
+assert(aiApi.includes('process.env.OPENAI_API_KEY'), "chave OpenAI fica somente no servidor");
+assert(!aiApi.includes("NEXT_PUBLIC_OPENAI"), "chave OpenAI não é exposta ao navegador");
 
 const aiPage = read("app/ia-brasa/page.tsx");
-assert(aiPage.includes('redirect("/dashboard")'), "IA não está exposta antes da etapa final");
+assert(aiPage.includes('redirect("/dashboard")'), "interface da IA continua oculta até a etapa final");
 
 const envExample = read(".env.example");
 assert(!/sb_secret_[A-Za-z0-9_-]+/.test(envExample), ".env.example não contém chave secreta Supabase");
