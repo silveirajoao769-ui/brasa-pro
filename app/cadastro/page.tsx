@@ -54,65 +54,91 @@ export default async function CadastroPage() {
   if (user) redirect("/dashboard");
 
   return (
-    <main className="signup-page">
-      <div className="signup-backdrop" aria-hidden="true" />
+    <main className="signup-showcase-page">
+      <div className="signup-showcase-photo" aria-hidden="true" />
+      <div className="signup-showcase-shade" aria-hidden="true" />
 
-      <section className="signup-shell">
-        <header className="signup-brand-row">
-          <Link href="/" className="signup-brand">
-            <span className="signup-brand-mark"><FlameMark /></span>
-            <span className="signup-brand-copy">
-              <b>Brasa <i>Pro</i></b>
-              <small>PLANEJE · CALCULE · VENDA · CRESÇA</small>
+      <header className="signup-showcase-topbar">
+        <Link href="/" className="signup-showcase-brand">
+          <span className="signup-showcase-brandmark"><FlameMark /></span>
+          <strong>BRASA <i>PRO</i></strong>
+        </Link>
+
+        <nav className="signup-showcase-nav" aria-label="Navegação">
+          <Link href="/#recursos">Recursos</Link>
+          <Link href="/plano">Planos</Link>
+          <Link href="/#sobre">Quem somos</Link>
+          <Link href="/suporte">Ajuda</Link>
+          <Link href="/login" className="signup-showcase-login">Entrar</Link>
+        </nav>
+      </header>
+
+      <section className="signup-showcase-grid">
+        <div className="signup-showcase-left">
+          <div className="signup-showcase-copy">
+            <span className="signup-showcase-kicker">
+              GESTÃO INTELIGENTE PARA QUEM LEVA CHURRASCO A SÉRIO
             </span>
-          </Link>
-        </header>
 
-        <section className="signup-hero">
-          <span className="signup-kicker">ENTRE PARA O BRASA PRO</span>
-          <h1>
-            Crie sua <span>conta</span>
-          </h1>
-          <p>
-            Planeje seus churrascos, organize sua operação e transforme cada evento em resultado.
-          </p>
+            <h1>
+              Crie sua <span>conta</span>
+            </h1>
 
-          <div className="signup-feature-row">
-            <div>
-              <span className="signup-feature-icon"><FeatureIcon kind="calc" /></span>
-              <b>Calculadora inteligente</b>
-            </div>
-            <div>
-              <span className="signup-feature-icon"><FeatureIcon kind="cart" /></span>
-              <b>Lista de compras</b>
-            </div>
-            <div>
-              <span className="signup-feature-icon"><FeatureIcon kind="chart" /></span>
-              <b>Ferramentas profissionais</b>
+            <p>
+              Entre para o Brasa Pro e leve seu churrasco — ou seu negócio — para o próximo nível.
+            </p>
+
+            <div className="signup-showcase-features">
+              <article>
+                <span className="signup-showcase-featureicon"><FeatureIcon kind="calc" /></span>
+                <h2>Calculadora inteligente</h2>
+                <p>Descubra quantidades ideais de carnes, bebidas e acompanhamentos.</p>
+              </article>
+
+              <article>
+                <span className="signup-showcase-featureicon"><FeatureIcon kind="cart" /></span>
+                <h2>Lista de compras</h2>
+                <p>Organize tudo que precisa comprar e tenha o custo estimado em um só lugar.</p>
+              </article>
+
+              <article>
+                <span className="signup-showcase-featureicon"><FeatureIcon kind="chart" /></span>
+                <h2>Ferramentas profissionais</h2>
+                <p>Controle clientes, eventos, propostas, equipe, financeiro e resultados.</p>
+              </article>
             </div>
           </div>
-        </section>
 
-        <section className="signup-card">
-          <div className="signup-card-heading">
-            <span className="eyebrow">CRIAR CONTA</span>
-            <h2>Comece do seu jeito.</h2>
-            <p>Escolha seu perfil e preencha seus dados. Você poderá alterar tudo depois.</p>
+          <div className="signup-showcase-signature">
+            <span>Mais churrasco.</span>
+            <b>Menos complicação.</b>
           </div>
+        </div>
 
-          <AuthForm mode="signup" />
+        <div className="signup-showcase-right">
+          <section className="signup-showcase-card">
+            <div className="signup-showcase-cardhead">
+              <span className="signup-showcase-mini-brand">
+                <span className="signup-showcase-mini-flame"><FlameMark /></span>
+                <b>Brasa <i>Pro</i></b>
+              </span>
+              <h2>Crie sua conta gratuitamente e comece agora.</h2>
+            </div>
 
-          <p className="signup-legal">
-            Ao criar sua conta, você concorda com nossos{" "}
-            <Link href="/termos">Termos de Uso</Link> e{" "}
-            <Link href="/privacidade">Política de Privacidade</Link>.
-          </p>
+            <AuthForm mode="signup" />
 
-          <div className="signup-switch">
-            <span>Já tem uma conta?</span>
-            <Link href="/login">Entrar</Link>
-          </div>
-        </section>
+            <p className="signup-showcase-legal">
+              Ao criar sua conta, você concorda com nossos{" "}
+              <Link href="/termos">Termos de Uso</Link> e nossa{" "}
+              <Link href="/privacidade">Política de Privacidade</Link>.
+            </p>
+
+            <div className="signup-showcase-switch">
+              <span>Já tem uma conta?</span>
+              <Link href="/login">Entrar</Link>
+            </div>
+          </section>
+        </div>
       </section>
     </main>
   );
