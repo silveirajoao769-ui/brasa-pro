@@ -47,6 +47,7 @@ export default async function PackagesPage() {
           <span><b>Brasa <i>Pro</i></b><small>PACOTES</small></span>
         </Link>
         <div className="detail-actions">
+          <Link href="/ia-brasa?mode=package" className="ghost-button">✦ IA para pacotes</Link>
           <Link href="/eventos" className="ghost-button">Eventos</Link>
           <Link href="/dashboard" className="primary-button compact">Dashboard</Link>
         </div>
