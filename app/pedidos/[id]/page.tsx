@@ -2,6 +2,7 @@ import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
 import OrderStatusForm from "@/components/OrderStatusForm";
 import { createClient } from "@/lib/supabase/server";
+import { isMarketplaceEnabled } from "@/lib/features";
 
 export const dynamic = "force-dynamic";
 
@@ -28,6 +29,8 @@ const statusLabels: Record<string, string> = {
 const steps = ["pending", "accepted", "preparing", "ready", "completed"];
 
 export default async function OrderDetailPage({ params }: PageProps) {
+  if (!isMarketplaceEnabled()) redirect("/em-breve?feature=Marketplace");
+
   const { id } = await params;
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
