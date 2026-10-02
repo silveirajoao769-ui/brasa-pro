@@ -108,6 +108,7 @@ export default async function FinancePage() {
           <span><b>Brasa <i>Pro</i></b><small>FINANCEIRO</small></span>
         </Link>
         <div className="detail-actions">
+          <Link href="/relatorios" className="ghost-button">Relatórios</Link>
           <Link href="/eventos" className="ghost-button">Eventos</Link>
           <Link href="/dashboard" className="primary-button compact">Dashboard</Link>
         </div>
