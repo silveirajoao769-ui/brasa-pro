@@ -2,6 +2,7 @@ import Link from "next/link";
 import { redirect } from "next/navigation";
 import PartnerProfileForm from "@/components/PartnerProfileForm";
 import PartnerProductForm from "@/components/PartnerProductForm";
+import PartnerProductEditor from "@/components/PartnerProductEditor";
 import { createClient } from "@/lib/supabase/server";
 import { requirePro } from "@/lib/subscription";
 
@@ -29,7 +30,7 @@ export default async function SupplierPortalPage() {
       .maybeSingle(),
     supabase
       .from("partner_products")
-      .select("id, name, category, unit, price, active, created_at")
+      .select("id, name, category, description, unit, price, active, created_at")
       .eq("partner_id", user.id)
       .order("created_at", { ascending: false }),
     supabase
@@ -141,6 +142,7 @@ export default async function SupplierPortalPage() {
                       <strong>{money(Number(product.price))}/{product.unit}</strong>
                       <small>{product.active ? "Ativo" : "Pausado"}</small>
                     </div>
+                    <PartnerProductEditor product={product} />
                   </div>
                 ))}
               </div>
