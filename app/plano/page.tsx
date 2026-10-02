@@ -2,6 +2,7 @@ import Link from "next/link";
 import { redirect } from "next/navigation";
 import UpgradeButton from "@/components/UpgradeButton";
 import { createClient } from "@/lib/supabase/server";
+import { getSubscription, isActivePro } from "@/lib/subscription";
 
 export const dynamic = "force-dynamic";
 
@@ -24,20 +25,19 @@ const proFeatures = [
   "Portal de fornecedor",
 ];
 
-export default async function PlanPage() {
+type PageProps = {
+  searchParams: Promise<{ feature?: string }>;
+};
+
+export default async function PlanPage({ searchParams }: PageProps) {
+  const { feature } = await searchParams;
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
 
   if (!user) redirect("/login");
 
-  const { data: subscription } = await supabase
-    .from("subscriptions")
-    .select("plan, status, provider, current_period_end, cancel_at_period_end")
-    .eq("user_id", user.id)
-    .maybeSingle();
-
-  const plan = subscription?.plan || "free";
-  const isPro = plan === "pro" && subscription?.status === "active";
+  const subscription = await getSubscription(supabase, user.id);
+  const isPro = isActivePro(subscription);
   const checkoutUrl = process.env.NEXT_PUBLIC_CAKTO_CHECKOUT_URL || "https://pay.cakto.com.br/6pdqeej_1163437";
 
   return (
@@ -58,6 +58,16 @@ export default async function PlanPage() {
             O plano Free cobre o churrasco do dia a dia. O Pro libera a operação profissional completa.
           </p>
         </div>
+
+        {!isPro && feature && (
+          <div className="billing-note">
+            <span>🔒</span>
+            <div>
+              <b>{feature} é um recurso do plano Pro</b>
+              <p>Assine o Brasa Pro para liberar esta área e os demais recursos profissionais.</p>
+            </div>
+          </div>
+        )}
 
         <div className="current-plan-card">
           <div>
@@ -110,8 +120,8 @@ export default async function PlanPage() {
           <div>
             <b>Assinatura recorrente</b>
             <p>
-              O checkout foi preparado para Mercado Pago. A cobrança só será liberada quando as credenciais
-              de produção estiverem configuradas no ambiente.
+              A assinatura é processada pela Cakto. Use no checkout o mesmo e-mail da sua conta Brasa Pro
+              para que o acesso seja liberado automaticamente após a aprovação do pagamento.
             </p>
           </div>
         </div>
