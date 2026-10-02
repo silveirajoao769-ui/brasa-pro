@@ -45,6 +45,22 @@ export default async function PublicProposalPage({ params }: PageProps) {
   if (error || !data || data.length === 0) notFound();
 
   const proposal = data[0];
+  const packageSnapshot = proposal.service_package_snapshot as
+    | {
+        name?: string;
+        description?: string;
+        price_per_person?: number | string;
+        charged_guests?: number;
+        min_guests?: number;
+        items?: Array<{
+          category?: string;
+          name?: string;
+          quantity?: number | null;
+          unit?: string;
+          notes?: string;
+        }>;
+      }
+    | null;
 
   return (
     <main className="public-proposal-page">
@@ -101,6 +117,38 @@ export default async function PublicProposalPage({ params }: PageProps) {
             <span>{proposal.guests} convidados</span>
           </div>
         </div>
+
+        {packageSnapshot && (
+          <div className="public-package-block">
+            <div className="public-package-heading">
+              <div>
+                <small>PACOTE SELECIONADO</small>
+                <h2>{packageSnapshot.name || "Pacote profissional"}</h2>
+                <p>{packageSnapshot.description || "Cardápio e serviço incluídos na proposta."}</p>
+              </div>
+              <div>
+                <small>POR PESSOA</small>
+                <strong>{money(Number(packageSnapshot.price_per_person || 0))}</strong>
+              </div>
+            </div>
+
+            {packageSnapshot.items && packageSnapshot.items.length > 0 && (
+              <div className="public-package-items">
+                {packageSnapshot.items.map((item, index) => (
+                  <div key={index}>
+                    <span>{item.category || "Incluído"}</span>
+                    <b>{item.name || "Item"}</b>
+                    <small>
+                      {item.quantity != null
+                        ? Number(item.quantity).toLocaleString("pt-BR") + " " + (item.unit || "un")
+                        : item.notes || "Incluído"}
+                    </small>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+        )}
 
         {proposal.event_notes && (
           <div className="public-proposal-notes">
