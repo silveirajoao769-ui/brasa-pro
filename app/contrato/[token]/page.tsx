@@ -23,6 +23,20 @@ type ContractSnapshot = {
   provider_phone?: string | null;
   provider_city?: string | null;
   provider_state?: string | null;
+  service_package?: {
+    name?: string;
+    description?: string;
+    price_per_person?: number | string;
+    charged_guests?: number;
+    min_guests?: number;
+    items?: Array<{
+      category?: string;
+      name?: string;
+      quantity?: number | null;
+      unit?: string;
+      notes?: string;
+    }>;
+  } | null;
 };
 
 function money(value: number) {
@@ -99,6 +113,38 @@ export default async function PublicContractPage({ params }: PageProps) {
           </div>
         </div>
 
+        {snapshot.service_package && (
+          <div className="public-package-block contract-package-block">
+            <div className="public-package-heading">
+              <div>
+                <small>PACOTE CONTRATADO</small>
+                <h2>{snapshot.service_package.name || "Pacote profissional"}</h2>
+                <p>{snapshot.service_package.description || "Escopo comercial aprovado pelo cliente."}</p>
+              </div>
+              <div>
+                <small>POR PESSOA</small>
+                <strong>{money(Number(snapshot.service_package.price_per_person || 0))}</strong>
+              </div>
+            </div>
+
+            {snapshot.service_package.items && snapshot.service_package.items.length > 0 && (
+              <div className="public-package-items">
+                {snapshot.service_package.items.map((item, index) => (
+                  <div key={index}>
+                    <span>{item.category || "Incluído"}</span>
+                    <b>{item.name || "Item"}</b>
+                    <small>
+                      {item.quantity != null
+                        ? Number(item.quantity).toLocaleString("pt-BR") + " " + (item.unit || "un")
+                        : item.notes || "Incluído"}
+                    </small>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+        )}
+
         <div className="contract-terms">
           <article>
             <span>01</span>
@@ -127,8 +173,10 @@ export default async function PublicContractPage({ params }: PageProps) {
             <div>
               <h2>Escopo e ajustes</h2>
               <p>
-                Alterações de quantidade de convidados, data, horário, cardápio, estrutura ou outros itens
-                devem ser combinadas entre as partes e podem exigir atualização do valor originalmente aprovado.
+                {snapshot.service_package
+                  ? "O escopo inclui o pacote " + (snapshot.service_package.name || "selecionado") +
+                    " e os itens exibidos neste contrato. Alterações de quantidade de convidados, data, horário, cardápio, estrutura ou outros itens devem ser combinadas entre as partes e podem exigir atualização do valor originalmente aprovado."
+                  : "Alterações de quantidade de convidados, data, horário, cardápio, estrutura ou outros itens devem ser combinadas entre as partes e podem exigir atualização do valor originalmente aprovado."}
               </p>
             </div>
           </article>
