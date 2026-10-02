@@ -61,6 +61,7 @@ export default async function DashboardPage() {
     clientCountResult,
     recentBarbecuesResult,
     eventsResult,
+    paymentsResult,
   ] = await Promise.all([
     supabase
       .from("barbecues")
@@ -81,6 +82,10 @@ export default async function DashboardPage() {
       .select("id, title, event_date, guests, revenue, status")
       .eq("user_id", user.id)
       .order("event_date", { ascending: true }),
+    supabase
+      .from("event_payments")
+      .select("amount, status")
+      .eq("user_id", user.id),
   ]);
 
   const events = eventsResult.data || [];
@@ -97,6 +102,9 @@ export default async function DashboardPage() {
   }
 
   const totalRevenue = events.reduce((sum, event) => sum + Number(event.revenue || 0), 0);
+  const receivedTotal = (paymentsResult.data || [])
+    .filter((payment) => payment.status === "paid")
+    .reduce((sum, payment) => sum + Number(payment.amount || 0), 0);
   const profit = totalRevenue - totalCosts;
   const margin = totalRevenue > 0 ? Math.round((profit / totalRevenue) * 100) : 0;
   const recentBarbecues = recentBarbecuesResult.data || [];
@@ -225,6 +233,7 @@ export default async function DashboardPage() {
             </div>
             <div className="finance-mini">
               <div><span>Receita</span><b>{money(totalRevenue)}</b></div>
+              <div><span>Recebido</span><b className="positive">{money(receivedTotal)}</b></div>
               <div><span>Custos</span><b>{money(totalCosts)}</b></div>
               <div><span>Lucro</span><b className={profit >= 0 ? "positive" : ""}>{money(profit)}</b></div>
             </div>
