@@ -26,6 +26,7 @@ const proFeatures = [
   "Cobranças, sinal e contas a receber",
   "Orçamentos com aprovação online",
   "Contrato digital com aceite eletrônico",
+  "Marca própria em propostas e contratos",
   "Estoque e movimentações",
   "Fornecedores e comparador de preços",
   "Portal de fornecedor",
