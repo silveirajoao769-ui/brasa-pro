@@ -88,6 +88,29 @@ export default async function PublicProposalPage({ params }: PageProps) {
           </div>
         </div>
 
+        <div className="public-provider-card">
+          <div className="public-provider-logo">
+            {proposal.provider_logo_url ? (
+              <img src={proposal.provider_logo_url} alt={proposal.provider_business_name || proposal.provider_name || "Logo"} />
+            ) : (
+              <span>🔥</span>
+            )}
+          </div>
+          <div className="public-provider-main">
+            <small>PROPOSTA DE</small>
+            <b>{proposal.provider_business_name || proposal.provider_name || "Profissional Brasa Pro"}</b>
+            <span>
+              {[proposal.provider_phone, proposal.provider_email, proposal.provider_instagram]
+                .filter(Boolean)
+                .join(" · ") || "Contato comercial não informado"}
+            </span>
+          </div>
+          <div className="public-provider-location">
+            <small>ATENDIMENTO</small>
+            <b>{[proposal.provider_city, proposal.provider_state].filter(Boolean).join(" / ") || "Região a combinar"}</b>
+          </div>
+        </div>
+
         <div className="public-proposal-summary">
           <div>
             <small>VALOR TOTAL</small>
