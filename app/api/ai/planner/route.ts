@@ -131,6 +131,13 @@ function extractResponseText(payload: unknown) {
 }
 
 export async function POST(request: NextRequest) {
+  if (process.env.AI_BRASA_ENABLED !== "true") {
+    return NextResponse.json(
+      { error: "IA Brasa ainda não está disponível." },
+      { status: 404 },
+    );
+  }
+
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
 
