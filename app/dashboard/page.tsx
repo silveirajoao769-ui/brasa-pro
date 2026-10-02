@@ -30,7 +30,7 @@ export default async function DashboardPage() {
 
   let { data: profile } = await supabase
     .from("profiles")
-    .select("full_name, account_type")
+    .select("full_name, account_type, onboarding_completed")
     .eq("id", user.id)
     .maybeSingle();
 
@@ -47,10 +47,14 @@ export default async function DashboardPage() {
         full_name: fallbackName,
         account_type: "consumer",
       })
-      .select("full_name, account_type")
+      .select("full_name, account_type, onboarding_completed")
       .single();
 
     profile = data;
+  }
+
+  if (profile && profile.onboarding_completed === false) {
+    redirect("/onboarding");
   }
 
   const subscription = await getSubscription(supabase, user.id);
