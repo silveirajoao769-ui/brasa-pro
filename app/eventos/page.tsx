@@ -60,7 +60,10 @@ export default async function EventsPage() {
           <span className="brand-flame">🔥</span>
           <span><b>Brasa <i>Pro</i></b><small>EVENTOS</small></span>
         </Link>
-        <Link href="/dashboard" className="ghost-button">← Dashboard</Link>
+        <div className="detail-actions">
+          <Link href="/agenda" className="ghost-button">Agenda</Link>
+          <Link href="/dashboard" className="ghost-button">← Dashboard</Link>
+        </div>
       </div>
 
       <section className="shell workspace-content">
