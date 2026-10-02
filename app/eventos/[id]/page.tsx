@@ -3,6 +3,7 @@ import { notFound, redirect } from "next/navigation";
 import EventCostForm from "@/components/EventCostForm";
 import QuoteForm from "@/components/QuoteForm";
 import { createClient } from "@/lib/supabase/server";
+import { requirePro } from "@/lib/subscription";
 
 export const dynamic = "force-dynamic";
 
@@ -41,6 +42,7 @@ export default async function EventDetailPage({ params }: PageProps) {
   const { data: { user } } = await supabase.auth.getUser();
 
   if (!user) redirect("/login");
+  await requirePro(supabase, user.id, "Eventos profissionais");
 
   const { data: event } = await supabase
     .from("events")
