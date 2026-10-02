@@ -5,30 +5,40 @@ export const dynamic = "force-dynamic";
 
 export default function ForgotPasswordPage() {
   return (
-    <main className="auth-page">
-      <section className="auth-shell">
-        <div className="auth-brand-side">
-          <Link href="/" className="brand">
-            <span className="brand-flame">🔥</span>
-            <span><b>Brasa <i>Pro</i></b><small>RECUPERAÇÃO DE ACESSO</small></span>
+    <main className="signup-page access-premium-page">
+      <div className="signup-backdrop" aria-hidden="true" />
+
+      <section className="signup-shell access-premium-shell">
+        <header className="signup-brand-row">
+          <Link href="/" className="signup-brand">
+            <span className="access-flame-mark">🔥</span>
+            <span className="signup-brand-copy">
+              <b>Brasa <i>Pro</i></b>
+              <small>ACESSO SEGURO</small>
+            </span>
           </Link>
+        </header>
 
-          <div>
-            <span className="eyebrow">RECUPERAR SENHA</span>
-            <h1>Volte para sua operação sem perder seus dados.</h1>
-            <p>Enviaremos um link seguro para o e-mail cadastrado na sua conta.</p>
+        <section className="signup-hero access-premium-hero compact">
+          <span className="signup-kicker">RECUPERAR ACESSO</span>
+          <h1>Volte para sua <span>conta</span></h1>
+          <p>Enviaremos um link seguro para o e-mail cadastrado.</p>
+        </section>
+
+        <section className="signup-card access-premium-card access-compact-card">
+          <div className="signup-card-heading">
+            <span className="eyebrow">ESQUECI MINHA SENHA</span>
+            <h2>Recuperar senha.</h2>
+            <p>Informe o e-mail usado no Brasa Pro.</p>
           </div>
-        </div>
 
-        <div className="auth-card">
-          <span className="eyebrow">ESQUECI MINHA SENHA</span>
-          <h2>Recuperar acesso</h2>
-          <p>Informe o e-mail usado no Brasa Pro.</p>
           <ForgotPasswordForm />
-          <div className="auth-switch">
-            Lembrou a senha? <Link href="/login">Voltar para entrar</Link>
+
+          <div className="signup-switch">
+            <span>Lembrou a senha?</span>
+            <Link href="/login">Voltar para entrar</Link>
           </div>
-        </div>
+        </section>
       </section>
     </main>
   );
