@@ -2,6 +2,7 @@ import Link from "next/link";
 import { redirect } from "next/navigation";
 import EventTaskForm from "@/components/EventTaskForm";
 import EventTaskToggle from "@/components/EventTaskToggle";
+import EventTaskEditor from "@/components/EventTaskEditor";
 import EventStatusSelect from "@/components/EventStatusSelect";
 import { createClient } from "@/lib/supabase/server";
 import { requirePro } from "@/lib/subscription";
@@ -260,6 +261,7 @@ export default async function AgendaPage() {
                         {task.notes && <small>{task.notes}</small>}
                       </div>
                       {overdue && <em>ATRASADA</em>}
+                      <EventTaskEditor task={task} />
                       {linkedEvent && (
                         <Link href={"/eventos/" + linkedEvent.id} className="event-arrow">→</Link>
                       )}
@@ -292,6 +294,7 @@ export default async function AgendaPage() {
                         {task.completed_at ? "Concluída em " + dateTimeLabel(task.completed_at) : "Concluída"}
                       </span>
                     </div>
+                    <EventTaskEditor task={task} />
                   </div>
                 ))}
               </div>
