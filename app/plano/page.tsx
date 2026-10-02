@@ -36,6 +36,15 @@ type PageProps = {
   searchParams: Promise<{ feature?: string }>;
 };
 
+function billingDate(value: string | null | undefined) {
+  if (!value) return null;
+  return new Intl.DateTimeFormat("pt-BR", {
+    day: "2-digit",
+    month: "long",
+    year: "numeric",
+  }).format(new Date(value));
+}
+
 export default async function PlanPage({ searchParams }: PageProps) {
   const { feature } = await searchParams;
   const supabase = await createClient();
@@ -45,6 +54,7 @@ export default async function PlanPage({ searchParams }: PageProps) {
 
   const subscription = await getSubscription(supabase, user.id);
   const isPro = isActivePro(subscription);
+  const periodEnd = billingDate(subscription?.current_period_end);
   const checkoutUrl = process.env.NEXT_PUBLIC_CAKTO_CHECKOUT_URL || "https://pay.cakto.com.br/6pdqeej_1163437";
 
   return (
@@ -80,14 +90,40 @@ export default async function PlanPage({ searchParams }: PageProps) {
           <div>
             <small>PLANO ATUAL</small>
             <strong>{isPro ? "PRO" : "FREE"}</strong>
-            <span>Status: {subscription?.status || "active"}</span>
+            <span>
+              {isPro
+                ? subscription?.cancel_at_period_end
+                  ? periodEnd
+                    ? "Acesso Pro até " + periodEnd
+                    : "Cancelamento programado"
+                  : periodEnd
+                    ? "Renovação prevista até " + periodEnd
+                    : "Assinatura ativa"
+                : "Plano gratuito ativo"}
+            </span>
           </div>
           {isPro ? (
-            <span className="current-plan-badge">ATIVO</span>
+            <span className={subscription?.cancel_at_period_end ? "current-plan-badge ending" : "current-plan-badge"}>
+              {subscription?.cancel_at_period_end ? "ENCERRA NO PERÍODO" : "ATIVO"}
+            </span>
           ) : (
             <span className="current-plan-badge free">GRÁTIS</span>
           )}
         </div>
+
+        {isPro && subscription?.cancel_at_period_end && (
+          <div className="billing-note warning">
+            <span>⏳</span>
+            <div>
+              <b>Sua assinatura não renovará automaticamente</b>
+              <p>
+                Você continua com todos os recursos Pro
+                {periodEnd ? " até " + periodEnd : " até o fim do período já pago"}.
+                Depois disso, sua conta volta ao plano Free.
+              </p>
+            </div>
+          </div>
+        )}
 
         <div className="plan-grid">
           <article className="plan-card">
