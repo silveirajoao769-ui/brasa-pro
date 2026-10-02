@@ -7043,3 +7043,61 @@ footer { border-top: 1px solid var(--line); padding: 30px 0; }
     justify-content: flex-start;
   }
 }
+
+
+/* Extended CRUD layouts */
+.supplier-card-row {
+  grid-template-columns: 38px minmax(0,1fr) auto auto;
+}
+.supplier-card-row > .row-manage-actions {
+  justify-content: flex-end;
+}
+.price-comparison-option-managed {
+  padding: 7px 8px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: rgba(255,255,255,.01);
+  align-items: center;
+}
+.price-comparison-option-managed > div:first-child {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+.price-comparison-option-managed > .row-manage-actions {
+  justify-content: flex-end;
+}
+.inventory-row {
+  grid-template-columns: 38px minmax(0,1fr) auto auto auto;
+}
+.inventory-row > .inventory-manage-actions {
+  justify-content: flex-end;
+}
+.partner-product-row {
+  grid-template-columns: 34px minmax(0,1fr) auto auto;
+}
+.partner-product-row > .row-manage-actions {
+  justify-content: flex-end;
+}
+@media (max-width: 900px) {
+  .supplier-card-row,
+  .inventory-row,
+  .partner-product-row {
+    grid-template-columns: 38px 1fr;
+  }
+  .supplier-card-row > em,
+  .supplier-card-row > .row-manage-actions,
+  .inventory-row > .inventory-qty,
+  .inventory-row > .inventory-value,
+  .inventory-row > .inventory-manage-actions,
+  .partner-product-row > div:nth-child(3),
+  .partner-product-row > .row-manage-actions {
+    grid-column: 2;
+    text-align: left;
+    justify-content: flex-start;
+  }
+  .price-comparison-option-managed {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+}
