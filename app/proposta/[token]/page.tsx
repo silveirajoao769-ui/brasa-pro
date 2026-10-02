@@ -4,6 +4,7 @@ import PublicQuoteResponse from "@/components/PublicQuoteResponse";
 import { createClient } from "@/lib/supabase/server";
 
 export const dynamic = "force-dynamic";
+export const metadata = { robots: { index: false, follow: false } };
 
 type PageProps = {
   params: Promise<{ token: string }>;
