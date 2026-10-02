@@ -59,6 +59,7 @@ export default async function DashboardPage() {
   const [
     barbecueCountResult,
     clientCountResult,
+    clientCRMResult,
     recentBarbecuesResult,
     eventsResult,
     paymentsResult,
@@ -71,6 +72,12 @@ export default async function DashboardPage() {
       .from("clients")
       .select("id", { count: "exact", head: true })
       .eq("user_id", user.id),
+    supabase
+      .from("clients")
+      .select("id, name, crm_stage, next_follow_up_at")
+      .eq("user_id", user.id)
+      .order("next_follow_up_at", { ascending: true, nullsFirst: false })
+      .limit(8),
     supabase
       .from("barbecues")
       .select("id, title, event_date, adults, children, estimated_cost, budget, status, created_at")
@@ -108,6 +115,14 @@ export default async function DashboardPage() {
   const profit = totalRevenue - totalCosts;
   const margin = totalRevenue > 0 ? Math.round((profit / totalRevenue) * 100) : 0;
   const recentBarbecues = recentBarbecuesResult.data || [];
+  const crmClients = clientCRMResult.data || [];
+  const now = new Date();
+  const overdueFollowUps = crmClients.filter(
+    (client) => client.next_follow_up_at && new Date(client.next_follow_up_at) < now,
+  );
+  const nextFollowUps = crmClients.filter(
+    (client) => client.next_follow_up_at && new Date(client.next_follow_up_at) >= now,
+  );
   const displayName = profile?.full_name?.trim() || "Churrasqueiro";
   const accountLabel =
     profile?.account_type === "professional"
@@ -241,6 +256,53 @@ export default async function DashboardPage() {
             </div>
             {events.length === 0 && (
               <p className="panel-note">Nenhum evento profissional cadastrado ainda.</p>
+            )}
+          </article>
+
+          <article className="dashboard-panel">
+            <div className="panel-heading">
+              <div><small>CRM COMERCIAL</small><h2>Follow-ups</h2></div>
+              {isPro && <Link href="/clientes" className="ghost-button">Abrir CRM</Link>}
+            </div>
+
+            {!isPro ? (
+              <div className="compact-empty">
+                <span>♙</span>
+                <b>CRM disponível no Pro</b>
+                <p>Acompanhe clientes, histórico, propostas e próximos contatos.</p>
+                <Link href="/plano?feature=Clientes%20e%20CRM" className="primary-button">Conhecer Pro →</Link>
+              </div>
+            ) : overdueFollowUps.length === 0 && nextFollowUps.length === 0 ? (
+              <div className="compact-empty">
+                <span>✓</span>
+                <b>Nenhum follow-up pendente</b>
+                <p>Abra um cliente para programar o próximo contato.</p>
+              </div>
+            ) : (
+              <div className="crm-dashboard-list">
+                {overdueFollowUps.slice(0, 2).map((client) => (
+                  <Link href={"/clientes/" + client.id} key={client.id} className="crm-dashboard-row overdue">
+                    <span>!</span>
+                    <div>
+                      <small>ATRASADO</small>
+                      <b>{client.name}</b>
+                      <p>{new Intl.DateTimeFormat("pt-BR", { day: "2-digit", month: "short", hour: "2-digit", minute: "2-digit" }).format(new Date(client.next_follow_up_at!))}</p>
+                    </div>
+                    <em>→</em>
+                  </Link>
+                ))}
+                {nextFollowUps.slice(0, 3).map((client) => (
+                  <Link href={"/clientes/" + client.id} key={client.id} className="crm-dashboard-row">
+                    <span>◷</span>
+                    <div>
+                      <small>PRÓXIMO CONTATO</small>
+                      <b>{client.name}</b>
+                      <p>{new Intl.DateTimeFormat("pt-BR", { day: "2-digit", month: "short", hour: "2-digit", minute: "2-digit" }).format(new Date(client.next_follow_up_at!))}</p>
+                    </div>
+                    <em>→</em>
+                  </Link>
+                ))}
+              </div>
             )}
           </article>
 
