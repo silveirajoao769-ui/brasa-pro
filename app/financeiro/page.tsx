@@ -19,7 +19,7 @@ export default async function FinancePage() {
   if (!user) redirect("/login");
   await requirePro(supabase, user.id, "Financeiro profissional");
 
-  const [{ data: events }, { data: quotes }] = await Promise.all([
+  const [{ data: events }, { data: quotes }, { data: payments }] = await Promise.all([
     supabase
       .from("events")
       .select("id, title, event_date, guests, revenue, status, created_at")
@@ -30,6 +30,12 @@ export default async function FinancePage() {
       .select("id, event_id, status, price_total, total_cost, margin_percent, created_at")
       .eq("user_id", user.id)
       .order("created_at", { ascending: false }),
+    supabase
+      .from("event_payments")
+      .select("id, event_id, kind, description, amount, due_date, status, paid_at, payment_method, created_at")
+      .eq("user_id", user.id)
+      .order("due_date", { ascending: true, nullsFirst: false })
+      .order("created_at", { ascending: true }),
   ]);
 
   const eventIds = (events || []).map((event) => event.id);
@@ -64,6 +70,36 @@ export default async function FinancePage() {
   const approvedQuotes = (quotes || []).filter((quote) => quote.status === "approved");
   const sentQuotes = (quotes || []).filter((quote) => quote.status === "sent");
 
+  const paymentRows = payments || [];
+  const activePayments = paymentRows.filter((payment) => payment.status !== "cancelled");
+  const receivedTotal = activePayments
+    .filter((payment) => payment.status === "paid")
+    .reduce((sum, payment) => sum + Number(payment.amount || 0), 0);
+  const pendingScheduled = activePayments
+    .filter((payment) => payment.status === "pending")
+    .reduce((sum, payment) => sum + Number(payment.amount || 0), 0);
+  const contractedRevenue = rows
+    .filter((event) => ["approved", "scheduled", "completed"].includes(event.status))
+    .reduce((sum, event) => sum + event.revenue, 0);
+  const toReceiveTotal = Math.max(0, contractedRevenue - receivedTotal);
+
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+  const overduePayments = activePayments.filter(
+    (payment) =>
+      payment.status === "pending" &&
+      payment.due_date &&
+      new Date(payment.due_date + "T12:00:00") < today,
+  );
+  const overdueTotal = overduePayments.reduce(
+    (sum, payment) => sum + Number(payment.amount || 0),
+    0,
+  );
+  const eventMap = new Map(rows.map((event) => [event.id, event]));
+  const nextReceivables = activePayments
+    .filter((payment) => payment.status === "pending")
+    .slice(0, 8);
+
   return (
     <main className="workspace-page">
       <div className="shell workspace-topbar">
@@ -82,7 +118,7 @@ export default async function FinancePage() {
           <div>
             <span className="eyebrow">RESULTADO DO NEGÓCIO</span>
             <h1>Financeiro sem planilha.</h1>
-            <p>Veja receita, custos, lucro, margem e desempenho de cada evento.</p>
+            <p>Veja receita, custos, lucro, margem, valores recebidos e o que ainda falta entrar.</p>
           </div>
           <span className="workspace-count">{rows.length} eventos</span>
         </div>
@@ -107,6 +143,29 @@ export default async function FinancePage() {
             <small>ORÇAMENTOS</small>
             <strong>{approvedQuotes.length} aprovados</strong>
             <span>{sentQuotes.length} aguardando resposta</span>
+          </article>
+        </div>
+
+        <div className="cashflow-overview">
+          <article className="cashflow-received">
+            <small>JÁ RECEBIDO</small>
+            <strong>{money(receivedTotal)}</strong>
+            <span>Entradas confirmadas</span>
+          </article>
+          <article>
+            <small>A RECEBER</small>
+            <strong>{money(toReceiveTotal)}</strong>
+            <span>{money(pendingScheduled)} já programados</span>
+          </article>
+          <article className={overduePayments.length > 0 ? "cashflow-overdue" : ""}>
+            <small>VENCIDO</small>
+            <strong>{money(overdueTotal)}</strong>
+            <span>{overduePayments.length} cobrança(s) atrasada(s)</span>
+          </article>
+          <article>
+            <small>RECEITA CONTRATADA</small>
+            <strong>{money(contractedRevenue)}</strong>
+            <span>Eventos aprovados/agendados/concluídos</span>
           </article>
         </div>
 
@@ -183,6 +242,55 @@ export default async function FinancePage() {
             </div>
           </article>
         </div>
+
+        <article className="workspace-panel finance-receivables-panel">
+          <div className="panel-heading">
+            <div><small>CONTAS A RECEBER</small><h2>Próximas cobranças</h2></div>
+            <span className="workspace-count">{nextReceivables.length} pendentes</span>
+          </div>
+
+          {nextReceivables.length === 0 ? (
+            <div className="compact-empty">
+              <span>💰</span>
+              <b>Nenhuma cobrança pendente</b>
+              <p>Crie sinais, parcelas ou saldo final dentro de cada evento.</p>
+            </div>
+          ) : (
+            <div className="finance-receivable-list">
+              {nextReceivables.map((payment) => {
+                const linkedEvent = eventMap.get(payment.event_id);
+                const overdue = Boolean(
+                  payment.due_date &&
+                  new Date(payment.due_date + "T12:00:00") < today,
+                );
+
+                return (
+                  <Link
+                    href={"/eventos/" + payment.event_id}
+                    className={overdue ? "finance-receivable-row overdue" : "finance-receivable-row"}
+                    key={payment.id}
+                  >
+                    <div>
+                      <small>{overdue ? "VENCIDO" : "PENDENTE"}</small>
+                      <b>{payment.description || "Cobrança do evento"}</b>
+                      <span>{linkedEvent?.title || "Evento"}</span>
+                    </div>
+                    <div>
+                      <small>VENCIMENTO</small>
+                      <b>
+                        {payment.due_date
+                          ? new Intl.DateTimeFormat("pt-BR").format(new Date(payment.due_date + "T12:00:00"))
+                          : "Sem data"}
+                      </b>
+                    </div>
+                    <strong>{money(Number(payment.amount || 0))}</strong>
+                    <span className="event-arrow">→</span>
+                  </Link>
+                );
+              })}
+            </div>
+          )}
+        </article>
       </section>
     </main>
   );
