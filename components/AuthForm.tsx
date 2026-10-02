@@ -93,6 +93,58 @@ export default function AuthForm({ mode }: AuthFormProps) {
     }
 
     if (mode === "signup") {
+      const emailRedirectTo =
+        window.location.origin + "/auth/callback?next=" + encodeURIComponent("/dashboard");
+
+      const { data, error } = await supabase.auth.signUp({
+        email,
+        password: formPassword,
+        options: {
+          emailRedirectTo,
+          data: {
+            full_name: fullName,
+            account_type: accountType,
+            tax_id: accountType === "professional" ? taxId : null,
+          },
+        },
+      });
+
+      if (error) {
+        setMessage(error.message);
+        setLoading(false);
+        return;
+      }
+
+      if (!data.session) {
+        const repeatedSignup = (data.user?.identities?.length || 0) === 0;
+
+        setMessage(
+          repeatedSignup
+            ? "Esse e-mail já pode ter sido cadastrado. Entre na conta ou use a recuperação de senha."
+            : "Cadastro recebido. Confira sua caixa de entrada e o spam para confirmar o e-mail."
+        );
+
+        setLoading(false);
+        return;
+      }
+    } else {
+      const { error } = await supabase.auth.signInWithPassword({
+        email,
+        password: formPassword,
+      });
+
+      if (error) {
+        setMessage("E-mail ou senha inválidos.");
+        setLoading(false);
+        return;
+      }
+    }
+
+    router.push("/dashboard");
+    router.refresh();
+  }
+
+  if (mode === "signup") {
     return (
       <form className="signup-auth-form signup-showcase-auth-form" onSubmit={handleSubmit}>
         <label className="signup-field">
@@ -166,7 +218,13 @@ export default function AuthForm({ mode }: AuthFormProps) {
               <i className={passwordStrength >= 1 ? "active" : ""} />
               <i className={passwordStrength >= 2 ? "active" : ""} />
               <i className={passwordStrength >= 3 ? "active" : ""} />
-              <small>{passwordStrength >= 3 ? "Senha forte" : passwordStrength === 2 ? "Senha boa" : "Senha fraca"}</small>
+              <small>
+                {passwordStrength >= 3
+                  ? "Senha forte"
+                  : passwordStrength === 2
+                    ? "Senha boa"
+                    : "Senha fraca"}
+              </small>
             </span>
           )}
         </label>
