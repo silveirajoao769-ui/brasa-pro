@@ -4,10 +4,16 @@ import EventCostForm from "@/components/EventCostForm";
 import EventTaskToggle from "@/components/EventTaskToggle";
 import EventPaymentForm from "@/components/EventPaymentForm";
 import EventPaymentActions from "@/components/EventPaymentActions";
+import EventPaymentEditor from "@/components/EventPaymentEditor";
 import EventTeamAssignmentForm from "@/components/EventTeamAssignmentForm";
 import EventTeamStatusSelect from "@/components/EventTeamStatusSelect";
+import EventTeamAssignmentEditor from "@/components/EventTeamAssignmentEditor";
 import QuoteForm from "@/components/QuoteForm";
 import PackageQuoteForm from "@/components/PackageQuoteForm";
+import EventTaskEditor from "@/components/EventTaskEditor";
+import EventCostEditor from "@/components/EventCostEditor";
+import EventDetailsEditor from "@/components/EventDetailsEditor";
+import RecordDeleteButton from "@/components/RecordDeleteButton";
 import { createClient } from "@/lib/supabase/server";
 import { requirePro } from "@/lib/subscription";
 
@@ -59,10 +65,10 @@ export default async function EventDetailPage({ params }: PageProps) {
 
   if (!event) notFound();
 
-  const [{ data: costs }, clientResult, quoteResult, { data: tasks }, { data: payments }, { data: teamMembers }, { data: teamAssignments }, { data: servicePackages }] = await Promise.all([
+  const [{ data: costs }, clientResult, quoteResult, { data: tasks }, { data: payments }, { data: teamMembers }, { data: teamAssignments }, { data: servicePackages }, { data: allClients }] = await Promise.all([
     supabase
       .from("event_costs")
-      .select("id, category, description, amount, created_at")
+      .select("id, category, description, amount, source_type, source_id, created_at")
       .eq("event_id", id)
       .order("created_at", { ascending: false }),
     event.client_id
@@ -113,6 +119,11 @@ export default async function EventDetailPage({ params }: PageProps) {
       .eq("user_id", user.id)
       .eq("active", true)
       .order("price_per_person", { ascending: true }),
+    supabase
+      .from("clients")
+      .select("id, name")
+      .eq("user_id", user.id)
+      .order("name"),
   ]);
 
   const client = clientResult.data;
@@ -306,11 +317,14 @@ export default async function EventDetailPage({ params }: PageProps) {
                                   : "Pendente"}
                           </small>
                         </div>
-                        <EventPaymentActions
-                          paymentId={payment.id}
-                          status={payment.status}
-                          paymentMethod={payment.payment_method}
-                        />
+                        <div className="receivable-row-actions">
+                          <EventPaymentActions
+                            paymentId={payment.id}
+                            status={payment.status}
+                            paymentMethod={payment.payment_method}
+                          />
+                          <EventPaymentEditor payment={payment} />
+                        </div>
                       </div>
                     );
                   })}
@@ -350,6 +364,7 @@ export default async function EventDetailPage({ params }: PageProps) {
                       <small>Lançado no evento</small>
                     </div>
                     <strong>{money(Number(cost.amount))}</strong>
+                    <EventCostEditor cost={cost} />
                   </div>
                 ))}
               </div>
@@ -435,10 +450,13 @@ export default async function EventDetailPage({ params }: PageProps) {
                           <small>CUSTO</small>
                           <strong>{money(assignmentCost)}</strong>
                         </div>
-                        <EventTeamStatusSelect
-                          assignmentId={assignment.id}
-                          status={assignment.status}
-                        />
+                        <div className="event-team-row-actions">
+                          <EventTeamStatusSelect
+                            assignmentId={assignment.id}
+                            status={assignment.status}
+                          />
+                          <EventTeamAssignmentEditor assignment={assignment} />
+                        </div>
                       </div>
                     );
                   })}
@@ -497,6 +515,7 @@ export default async function EventDetailPage({ params }: PageProps) {
                     </span>
                     {task.notes && <small>{task.notes}</small>}
                   </div>
+                  <EventTaskEditor task={task} />
                 </div>
               ))}
             </div>
