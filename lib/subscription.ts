@@ -12,7 +12,13 @@ export type BrasaSubscription = {
 };
 
 export function isActivePro(subscription: BrasaSubscription | null | undefined) {
-  return subscription?.plan === "pro" && subscription?.status === "active";
+  if (subscription?.plan !== "pro" || subscription?.status !== "active") return false;
+
+  if (subscription.cancel_at_period_end && subscription.current_period_end) {
+    return new Date(subscription.current_period_end).getTime() > Date.now();
+  }
+
+  return true;
 }
 
 export async function getSubscription(
