@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 
 export default function PublicQuoteResponse({
@@ -10,6 +11,7 @@ export default function PublicQuoteResponse({
   token: string;
   status: string;
 }) {
+  const router = useRouter();
   const [message, setMessage] = useState("");
   const [clientMessage, setClientMessage] = useState("");
   const [loading, setLoading] = useState<"approved" | "rejected" | null>(null);
@@ -35,6 +37,7 @@ export default function PublicQuoteResponse({
     setCurrentStatus(decision);
     setMessage(decision === "approved" ? "Proposta aprovada com sucesso." : "Proposta recusada.");
     setLoading(null);
+    router.refresh();
   }
 
   if (currentStatus === "approved") {
