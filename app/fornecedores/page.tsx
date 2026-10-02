@@ -3,6 +3,7 @@ import { redirect } from "next/navigation";
 import SupplierForm from "@/components/SupplierForm";
 import SupplierProductForm from "@/components/SupplierProductForm";
 import { createClient } from "@/lib/supabase/server";
+import { requirePro } from "@/lib/subscription";
 
 export const dynamic = "force-dynamic";
 
@@ -22,6 +23,7 @@ export default async function SuppliersPage() {
   const { data: { user } } = await supabase.auth.getUser();
 
   if (!user) redirect("/login");
+  await requirePro(supabase, user.id, "Fornecedores e comparação de preços");
 
   const [{ data: suppliers }, { data: products }] = await Promise.all([
     supabase
