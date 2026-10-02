@@ -18,6 +18,7 @@ export default function ClientForm() {
     const name = String(form.get("name") || "").trim();
     const phone = String(form.get("phone") || "").trim();
     const email = String(form.get("email") || "").trim();
+    const source = String(form.get("source") || "").trim();
     const notes = String(form.get("notes") || "").trim();
 
     if (!name) {
@@ -39,6 +40,8 @@ export default function ClientForm() {
       name,
       phone: phone || null,
       email: email || null,
+      source: source || null,
+      crm_stage: "lead",
       notes,
     });
 
@@ -68,6 +71,10 @@ export default function ClientForm() {
         <label>
           E-mail
           <input name="email" type="email" placeholder="cliente@email.com" />
+        </label>
+        <label>
+          Origem
+          <input name="source" placeholder="Instagram, indicação, Google..." />
         </label>
         <label className="form-span-2">
           Observações
