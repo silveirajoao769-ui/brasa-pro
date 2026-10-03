@@ -11,7 +11,7 @@ const freeFeatures = [
   "Planejamentos salvos",
   "Lista de compras",
   "Receitas e fichas técnicas",
-  "Marketplace de fornecedores",
+  "Marketplace de fornecedores — em breve",
 ];
 
 const proFeatures = [
@@ -23,13 +23,14 @@ const proFeatures = [
   "Pacotes e cardápios com preço por pessoa",
   "Custos, lucro e margem",
   "Relatórios e indicadores do negócio",
+  "IA Brasa Pro para planejamento e análises",
   "Cobranças, sinal e contas a receber",
   "Orçamentos com aprovação online",
   "Contrato digital com aceite eletrônico",
   "Marca própria em propostas e contratos",
   "Estoque e movimentações",
   "Fornecedores e comparador de preços",
-  "Portal de fornecedor",
+  "Portal de fornecedor — em breve",
 ];
 
 type PageProps = {
