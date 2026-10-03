@@ -10,8 +10,12 @@ export async function GET() {
       process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY
     ),
     supabaseQuery: false,
-    checkoutConfigured: Boolean(process.env.NEXT_PUBLIC_CAKTO_CHECKOUT_URL),
-    aiDisabledByDefault: process.env.AI_BRASA_ENABLED !== "true",
+    checkoutConfigured: Boolean(
+      process.env.NEXT_PUBLIC_CAKTO_CHECKOUT_URL ||
+      "https://pay.cakto.com.br/6pdqeej_1163437"
+    ),
+    aiConfigured: Boolean(process.env.OPENAI_API_KEY),
+    marketplaceEnabled: process.env.MARKETPLACE_ENABLED === "true",
   };
 
   if (checks.supabaseEnv) {
@@ -24,6 +28,8 @@ export async function GET() {
     }
   }
 
+  // IA é opcional porque o Brasa Pro possui fallback determinístico/local.
+  // Marketplace desligado também é esperado no lançamento inicial.
   const healthy =
     checks.supabaseEnv &&
     checks.supabaseQuery &&
