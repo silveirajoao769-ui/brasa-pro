@@ -188,17 +188,50 @@ export default async function DashboardPage() {
       </aside>
 
       <section className="app-content">
-        <header className="app-header">
-          <div>
-            <span className="eyebrow">VISÃO GERAL</span>
-            <h1>Olá, {displayName}. 🔥</h1>
-            <p>Seus números abaixo agora vêm da sua conta no Brasa Pro.</p>
+        <header className="dashboard-topbar">
+          <Link href="/" className="dashboard-mobile-brand">🔥 <b>Brasa <i>Pro</i></b></Link>
+          <div className="dashboard-search">
+            <span>⌕</span>
+            <input aria-label="Buscar no Brasa Pro" placeholder="Buscar no Brasa Pro..." />
           </div>
-          <div className="app-header-actions">
-            <Link href="/planejar" className="primary-button compact">+ Novo churrasco</Link>
+          <div className="dashboard-topbar-user">
+            <span className="dashboard-notification">⌁</span>
             <div className="avatar">{displayName.slice(0, 2).toUpperCase()}</div>
+            <div>
+              <b>{displayName}</b>
+              <small>{accountLabel}</small>
+            </div>
           </div>
         </header>
+
+        <header className="app-header dashboard-welcome">
+          <div>
+            <span className="eyebrow">VISÃO GERAL</span>
+            <h1>Olá, {displayName}!</h1>
+            <p>{isPro ? "Aqui está o resumo do seu negócio no Brasa Pro." : "Vamos organizar seu próximo churrasco?"}</p>
+          </div>
+          <div className="app-header-actions">
+            <Link href="/ia-brasa?mode=planner" className="ghost-button">✦ IA Brasa</Link>
+            <Link href="/planejar" className="primary-button compact">+ Novo churrasco</Link>
+          </div>
+        </header>
+
+        <section className={isPro ? "dashboard-hero-card pro" : "dashboard-hero-card consumer"}>
+          <div>
+            <span className="eyebrow">{isPro ? "OPERAÇÃO PROFISSIONAL" : "PLANEJAMENTO INTELIGENTE"}</span>
+            <h2>{isPro ? "Controle eventos, clientes e lucro em um só lugar." : "Planeje seu churrasco de forma simples e prática."}</h2>
+            <p>{isPro ? "Acompanhe sua operação e tome decisões usando os dados reais da sua conta." : "Conte para a Brasa o tipo de evento, quantas pessoas e seu orçamento."}</p>
+            <div className="dashboard-hero-actions">
+              <Link href={isPro ? "/eventos" : "/planejar"} className="primary-button">
+                {isPro ? "Ver meus eventos →" : "Começar planejamento →"}
+              </Link>
+              {isPro && <Link href="/financeiro" className="ghost-button">Ver financeiro</Link>}
+            </div>
+          </div>
+          <div className="dashboard-hero-visual" aria-hidden="true">
+            <span>🔥</span>
+          </div>
+        </section>
 
         <div className="app-stats">
           {stats.map(([label,value,detail]) => (
