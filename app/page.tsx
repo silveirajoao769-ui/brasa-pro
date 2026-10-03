@@ -17,7 +17,7 @@ const personas = [
   {
     icon: "🥩",
     title: "Sou açougue / fornecedor",
-    description: "Conecte seus produtos a quem está planejando comprar.",
+    description: "Marketplace para açougues e parceiros está em preparação.",
     tag: "Em breve",
   },
 ];
@@ -80,7 +80,7 @@ export default function Home() {
                   </div>
                   <h3>{persona.title}</h3>
                   <p>{persona.description}</p>
-                  <Link href={index === 0 ? "/planejar" : index === 1 ? "/cadastro" : "/fornecedor"} aria-label={"Abrir " + persona.title}>→</Link>
+                  <Link href={index === 0 ? "/planejar" : index === 1 ? "/cadastro" : "/em-breve?feature=Marketplace"} aria-label={"Abrir " + persona.title}>→</Link>
                 </article>
               ))}
             </div>
