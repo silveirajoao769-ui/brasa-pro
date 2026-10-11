@@ -2,12 +2,12 @@ import Link from "next/link";
 import { signOut } from "@/lib/affiliate/signout";
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
-import { createCampaign, recordCommission, requestJoin, toggleTask } from "@/lib/affiliate/actions";
+import { createCampaign, recordCommission, requestJoin, toggleTask, markCommissionPaid } from "@/lib/affiliate/actions";
 
 export const dynamic = "force-dynamic";
 const brl = (cents: number) => new Intl.NumberFormat("pt-BR",{style:"currency",currency:"BRL"}).format(cents/100);
 const notices:Record<string,string> = {
-  campaign_created:"Campanha registrada.",commission_created:"Comissão registrada.",
+  campaign_created:"Campanha registrada.",commission_created:"Comissão registrada.",commission_paid:"Comissão marcada como recebida.",
   request_received:"Pedido enviado. Aguarde a aprovação do mentor.",
   task_updated:"Atividade atualizada.",invalid_campaign:"Confira os dados da campanha.",
   invalid_commission:"Informe uma comissão válida.",invalid_code:"Código de convite inválido.",
@@ -22,18 +22,21 @@ export default async function AffiliatePage({searchParams}:{searchParams:Promise
 
   const name=(typeof user.user_metadata?.full_name==="string" && user.user_metadata.full_name.trim()) || user.email?.split("@")[0] || "Afiliado";
   const profile=await db.from("aos_profiles").upsert({user_id:user.id,display_name:name.slice(0,100),preference:"affiliate"}, {onConflict:"user_id",ignoreDuplicates:true});
-  const [campaignsQuery,commissionsQuery,tasksQuery,membershipsQuery,pendingQuery]=await Promise.all([
+  const [campaignsQuery,commissionsQuery,tasksQuery,membershipsQuery,pendingQuery,totalsQuery]=await Promise.all([
     db.from("aos_campaigns").select("id,product_name,platform,channel,affiliate_url,spent_cents").eq("user_id",user.id).order("created_at",{ascending:false}).limit(60),
     db.from("aos_commissions").select("id,campaign_id,amount_cents,status").eq("user_id",user.id).order("created_at",{ascending:false}).limit(150),
     db.from("aos_tasks").select("id,title,description,due_at,completed_at").eq("student_id",user.id).order("created_at",{ascending:false}).limit(100),
     db.from("aos_enrollments").select("id").eq("user_id",user.id),
-    db.from("aos_join_requests").select("id").eq("user_id",user.id)
+    db.from("aos_join_requests").select("id").eq("user_id",user.id),
+    db.rpc("aos_my_financial_summary").single()
   ]);
   const campaigns=campaignsQuery.data||[], commissions=commissionsQuery.data||[], tasks=tasksQuery.data||[];
-  const spent=campaigns.reduce((s,c)=>s+Number(c.spent_cents||0),0);
-  const paid=commissions.filter(c=>c.status==="paid").reduce((s,c)=>s+Number(c.amount_cents||0),0);
-  const pending=commissions.filter(c=>c.status==="pending").reduce((s,c)=>s+Number(c.amount_cents||0),0);
-  const errors=[profile.error,campaignsQuery.error,commissionsQuery.error,tasksQuery.error,membershipsQuery.error,pendingQuery.error].some(Boolean);
+  const totals=totalsQuery.data;
+  const spent=totals?.spent_cents == null ? null : Number(totals.spent_cents);
+  const paid=totals?.received_cents == null ? null : Number(totals.received_cents);
+  const pending=totals?.pending_cents == null ? null : Number(totals.pending_cents);
+  const pendingCommissions=commissions.filter(c=>c.status==="pending");
+  const errors=[profile.error,campaignsQuery.error,commissionsQuery.error,tasksQuery.error,membershipsQuery.error,pendingQuery.error,totalsQuery.error].some(Boolean);
   return <main className="aos-root aos-workspace"><div className="aos-workspace-shell">
     <aside className="aos-work-nav"><Link className="aos-logo" href="/"><span className="aos-logo-mark">A<span>↗</span></span><span>afiliado<span className="aos-logo-accent">OS</span><small>OPERATING SYSTEM</small></span></Link><h3>MINHA OPERAÇÃO</h3><Link href="/afiliado" className="active">◫ Visão geral</Link><a href="#campanhas">↗ Campanhas</a><a href="#comissoes">▣ Comissões</a><a href="#atividades">◎ Atividades</a><a href="#turmas">◇ Minhas turmas</a><h3>OUTROS</h3><Link href="/mentor">♧ Painel mentor</Link><form action={signOut} className="aos-signout"><button type="submit">↪ Sair da conta</button></form></aside>
     <section className="aos-work-content">
@@ -42,15 +45,22 @@ export default async function AffiliatePage({searchParams}:{searchParams:Promise
       {status&&notices[status]&&<p role="status" className="aos-alert">{notices[status]}</p>}
       {errors&&<p role="alert" className="aos-alert">Banco do Afiliado OS ainda não configurado. Execute a migração SQL no ambiente de teste para salvar dados reais.</p>}
       <div className="aos-kpis">
-        <article className="aos-kpi"><small>Comissões recebidas</small><strong>{brl(paid)}</strong><span>Registradas por você</span></article>
-        <article className="aos-kpi"><small>Comissões pendentes</small><strong>{brl(pending)}</strong><span>Aguardando recebimento</span></article>
-        <article className="aos-kpi"><small>Despesas das campanhas</small><strong>{brl(spent)}</strong><span>Investimento registrado</span></article>
-        <article className="aos-kpi"><small>Saldo registrado</small><strong>{brl(paid-spent)}</strong><span>Recebido menos despesas</span></article>
+        <article className="aos-kpi"><small>Comissões recebidas</small><strong>{paid === null ? "—" : brl(paid)}</strong><span>Registradas por você</span></article>
+        <article className="aos-kpi"><small>Comissões pendentes</small><strong>{pending === null ? "—" : brl(pending)}</strong><span>Aguardando recebimento</span></article>
+        <article className="aos-kpi"><small>Despesas das campanhas</small><strong>{spent === null ? "—" : brl(spent)}</strong><span>Investimento registrado</span></article>
+        <article className="aos-kpi"><small>Saldo registrado</small><strong>{paid === null || spent === null ? "—" : brl(paid-spent)}</strong><span>Recebido menos despesas</span></article>
       </div>
       <div className="aos-dashboard-grid"><div>
-        <section className="aos-card" id="campanhas"><h2>↗ Campanhas e links</h2>{campaigns.length?
+        <section className="aos-card" id="campanhas"><h2>↗ Campanhas e links</h2><p>Exibindo as 60 campanhas mais recentes. O resumo financeiro considera todo o histórico.</p>{campaigns.length?
           <table className="aos-table"><thead><tr><th>PRODUTO</th><th>CANAL</th><th>DESPESA</th><th>LINK</th></tr></thead><tbody>{campaigns.map(c=><tr key={c.id}><td><b>{c.product_name}</b><small>{c.platform}</small></td><td>{c.channel}</td><td>{brl(Number(c.spent_cents))}</td><td><a href={c.affiliate_url} target="_blank" rel="noopener noreferrer">Abrir ↗</a></td></tr>)}</tbody></table>
           :<div className="aos-empty">Nenhuma campanha cadastrada. Adicione o primeiro produto.</div>}</section>
+        <section className="aos-card"><h2>⌁ Comissões aguardando pagamento</h2>
+          {pendingCommissions.length ? pendingCommissions.slice(0,15).map(c=><div className="aos-task-item" key={c.id}>
+            <div><b>{brl(Number(c.amount_cents))}</b><small>{campaigns.find(p=>p.id===c.campaign_id)?.product_name || "Campanha antiga"}</small></div>
+            <form action={markCommissionPaid}><input type="hidden" name="commission_id" value={c.id}/><button type="submit">Recebida ✓</button></form>
+          </div>) : <div className="aos-empty">Nenhuma comissão pendente entre os últimos registros.</div>}
+          <p className="aos-helper">Informe o recebimento apenas após confirmar o pagamento na plataforma de afiliados.</p>
+        </section>
         <section className="aos-card" id="atividades"><h2>◎ Atividades do mentor <span className="aos-tag aos-tag-neutral">{tasks.filter(t=>t.completed_at).length}/{tasks.length}</span></h2>{tasks.length?tasks.map(t=>
           <div className="aos-task-item" key={t.id}><div><b className={t.completed_at?"completed":""}>{t.title}</b><small>{t.description}{t.due_at?" · Prazo: "+new Date(t.due_at+"T12:00:00").toLocaleDateString("pt-BR"):""}</small></div><form action={toggleTask}><input type="hidden" name="task_id" value={t.id}/><input type="hidden" name="completed" value={String(!t.completed_at)}/><button>{t.completed_at?"Reabrir":"Concluir ✓"}</button></form></div>
         ):<div className="aos-empty">Entre em uma turma para receber atividades.</div>}</section>

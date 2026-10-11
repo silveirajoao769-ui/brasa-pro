@@ -152,3 +152,20 @@ export async function toggleTask(form: FormData) {
   revalidatePath("/mentor");
   redirect("/afiliado?status=task_updated");
 }
+
+
+export async function markCommissionPaid(form: FormData) {
+  const { db, user } = await session();
+  const id = trimmed(form, "commission_id", 36);
+  if (!/^[a-f0-9-]{36}$/i.test(id)) redirect("/afiliado?status=invalid_commission");
+  const { data, error } = await db.from("aos_commissions")
+    .update({ status: "paid" })
+    .eq("id", id)
+    .eq("user_id", user.id)
+    .eq("status", "pending")
+    .select("id").maybeSingle();
+  if (error) redirect("/afiliado?status=save_error");
+  if (!data) redirect("/afiliado?status=invalid_commission");
+  revalidatePath("/afiliado");
+  redirect("/afiliado?status=commission_paid");
+}

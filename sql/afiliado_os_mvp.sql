@@ -110,6 +110,10 @@ create policy aos_profiles_read on public.aos_profiles
     select 1 from public.aos_enrollments e
     join public.aos_cohorts c on c.id=e.cohort_id
     where e.user_id=aos_profiles.user_id and c.mentor_id=(select auth.uid())
+  ) or exists (
+    select 1 from public.aos_join_requests jr
+    join public.aos_cohorts c on c.invite_code=jr.invite_code
+    where jr.user_id=aos_profiles.user_id and c.mentor_id=(select auth.uid())
   )
  );
 create policy aos_profiles_insert on public.aos_profiles
@@ -207,3 +211,26 @@ create policy aos_tasks_complete on public.aos_tasks
 
 -- Important: RLS is essential but not a substitute for an actual staging database,
 -- role impersonation tests, billing isolation, and privacy review.
+
+
+-- Invoker-only aggregate: never reveal another affiliate's financial totals.
+-- Grants on the function are explicit to avoid exposing it anonymously.
+create or replace function public.aos_my_financial_summary()
+returns table (
+  spent_cents numeric,
+  received_cents numeric,
+  pending_cents numeric
+)
+language sql stable security invoker
+set search_path = ''
+as $$
+  select
+    coalesce((select sum(c.spent_cents) from public.aos_campaigns c
+              where c.user_id=(select auth.uid())), 0)::numeric,
+    coalesce((select sum(m.amount_cents) from public.aos_commissions m
+              where m.user_id=(select auth.uid()) and m.status='paid'), 0)::numeric,
+    coalesce((select sum(m.amount_cents) from public.aos_commissions m
+              where m.user_id=(select auth.uid()) and m.status='pending'), 0)::numeric;
+$$;
+revoke all on function public.aos_my_financial_summary() from public, anon;
+grant execute on function public.aos_my_financial_summary() to authenticated;

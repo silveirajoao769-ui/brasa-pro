@@ -31,7 +31,8 @@ export default async function MentorPage({searchParams}:{searchParams:Promise<{s
     ids.length?db.from("aos_tasks").select("id,title,cohort_id,student_id,completed_at").eq("mentor_id",user.id).order("created_at",{ascending:false}).limit(150):Promise.resolve({data:[],error:null})
   ]);
   const enrollments=enrollmentsResult.data||[], requests=requestsResult.data||[], tasks=tasksResult.data||[];
-  const userIds=[...new Set(enrollments.map(e=>e.user_id))];
+  const userIds=[...new Set([...enrollments.map(e=>e.user_id),...requests.map(r=>r.user_id)])];
+  const enrolledCount=new Set(enrollments.map(e=>e.user_id)).size;
   const {data:profiles}=userIds.length?await db.from("aos_profiles").select("user_id,display_name").in("user_id",userIds):{data:[]};
   const names=new Map((profiles||[]).map(p=>[p.user_id,p.display_name]));
   const broken=[cohortsResult.error,enrollmentsResult.error,requestsResult.error,tasksResult.error].some(Boolean);
@@ -43,7 +44,7 @@ export default async function MentorPage({searchParams}:{searchParams:Promise<{s
       <div className="aos-work-title"><div><span className="aos-overline">CENTRAL DO MENTOR</span><h1>Da aula à execução.</h1><p>Organize turmas, aprove alunos e distribua atividades práticas.</p></div><Link href="/afiliado" className="aos-btn aos-btn-outline">Ver como afiliado ↗</Link></div>
       {status&&notes[status]&&<p role="status" className="aos-alert">{notes[status]}</p>}
       {broken&&<p role="alert" className="aos-alert">As tabelas do Afiliado OS ainda não estão disponíveis neste ambiente. Execute a migração SQL em um banco de teste.</p>}
-      <div className="aos-kpis"><article className="aos-kpi"><small>Minhas turmas</small><strong>{cohorts.length}</strong><span>Turmas criadas</span></article><article className="aos-kpi"><small>Alunos</small><strong>{userIds.length}</strong><span>Participantes distintos</span></article><article className="aos-kpi"><small>Pedidos de entrada</small><strong>{requests.length}</strong><span>Aguardando avaliação</span></article><article className="aos-kpi"><small>Tarefas realizadas</small><strong>{tasks.filter(t=>t.completed_at).length}/{tasks.length}</strong><span>Concluídas pelos alunos</span></article></div>
+      <div className="aos-kpis"><article className="aos-kpi"><small>Minhas turmas</small><strong>{cohorts.length}</strong><span>Turmas criadas</span></article><article className="aos-kpi"><small>Alunos</small><strong>{enrolledCount}</strong><span>Participantes distintos</span></article><article className="aos-kpi"><small>Pedidos de entrada</small><strong>{requests.length}</strong><span>Aguardando avaliação</span></article><article className="aos-kpi"><small>Tarefas realizadas</small><strong>{tasks.filter(t=>t.completed_at).length}/{tasks.length}</strong><span>Concluídas pelos alunos</span></article></div>
       <div className="aos-dashboard-grid"><div>
         <section className="aos-card" id="turmas"><h2>◇ Minhas turmas</h2>{cohorts.length?cohorts.map(c=>{
           const members=enrollments.filter(e=>e.cohort_id===c.id);
@@ -54,7 +55,7 @@ export default async function MentorPage({searchParams}:{searchParams:Promise<{s
         <section className="aos-card" id="tarefas"><h2>◎ Progresso de atividades</h2>{tasks.length?<table className="aos-table"><thead><tr><th>ALUNO</th><th>ATIVIDADE</th><th>STATUS</th></tr></thead><tbody>{tasks.map(t=><tr key={t.id}><td>{names.get(t.student_id)||"Aluno"}</td><td>{t.title}</td><td><span className={t.completed_at?"aos-tag":"aos-tag aos-tag-neutral"}>{t.completed_at?"Concluída":"Pendente"}</span></td></tr>)}</tbody></table>:<div className="aos-empty">Nenhuma atividade distribuída.</div>}</section>
       </div><div>
         <section className="aos-card"><h2>＋ Criar turma</h2><p>Cada turma tem um código de convite único.</p><form action={createCohort} className="aos-stack-form"><label>Nome da turma<input name="name" minLength={3} maxLength={100} required placeholder="Ex.: Mentoria Outubro"/></label><button className="aos-btn aos-btn-primary">Criar turma ↗</button></form></section>
-        <section className="aos-card" id="pedidos"><h2>☰ Aguardando aprovação</h2><p>Os alunos que entrarem com o seu código aparecerão aqui.</p>{requests.length?requests.map(r=><div key={r.id} className="aos-task-item"><div><b>Solicitação de aluno</b><small>{cohorts.find(c=>c.invite_code===r.invite_code)?.name||"Turma"} · ID {r.user_id.slice(0,8)}…</small></div><form action={approveJoin}><input type="hidden" name="request_id" value={r.id}/><button>Aprovar ✓</button></form></div>):<div className="aos-empty">Sem pedidos por enquanto.</div>}</section>
+        <section className="aos-card" id="pedidos"><h2>☰ Aguardando aprovação</h2><p>Os alunos que entrarem com o seu código aparecerão aqui.</p>{requests.length?requests.map(r=><div key={r.id} className="aos-task-item"><div><b>Solicitação de aluno</b><small>{cohorts.find(c=>c.invite_code===r.invite_code)?.name||"Turma"} · {names.get(r.user_id) || ("ID "+r.user_id.slice(0,8)+"…")}</small></div><form action={approveJoin}><input type="hidden" name="request_id" value={r.id}/><button>Aprovar ✓</button></form></div>):<div className="aos-empty">Sem pedidos por enquanto.</div>}</section>
         <section className="aos-card"><h2>Dados e privacidade</h2><p>O mentor acompanha atividades vinculadas à turma, não o saldo financeiro individual dos afiliados. Números de vendas só serão compartilhados no futuro mediante consentimento específico.</p></section>
       </div></div>
     </section>
