@@ -34,8 +34,14 @@ export async function proxy(request: NextRequest) {
   }
 
   const segment = pathname.split("/")[1] || "";
-  if (legacySegments.has(segment) && (request.method === "GET" || request.method === "HEAD")) {
-    return NextResponse.redirect(new URL("/afiliado",request.url),307);
+  if (legacySegments.has(segment)) {
+    if (request.method === "GET" || request.method === "HEAD") {
+      return NextResponse.redirect(new URL("/afiliado", request.url), 307);
+    }
+    return NextResponse.json(
+      { error: "Módulo legado indisponível nesta versão." },
+      { status: 410, headers: { "cache-control": "no-store" } }
+    );
   }
 
   return updateSession(request);
