@@ -234,3 +234,14 @@ as $$
 $$;
 revoke all on function public.aos_my_financial_summary() from public, anon;
 grant execute on function public.aos_my_financial_summary() to authenticated;
+
+
+-- Public liveness probe: does not read user data or bypass row access.
+create or replace function public.aos_healthcheck()
+returns boolean language sql stable security invoker
+set search_path = ''
+as $$
+ select pg_catalog.to_regclass('public.aos_profiles') is not null
+$$;
+revoke all on function public.aos_healthcheck() from public;
+grant execute on function public.aos_healthcheck() to anon, authenticated;
