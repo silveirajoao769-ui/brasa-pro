@@ -40,7 +40,7 @@ export default function AccessForm({ mode }: { mode: Mode }) {
           },
         });
         if (error) throw error;
-        if (!result.session) {
+        if (!result.session || !result.user) {
           setMessage("Cadastro enviado. Confira seu e-mail para confirmar a conta antes de entrar.");
           return;
         }
