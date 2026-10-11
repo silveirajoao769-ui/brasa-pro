@@ -36,7 +36,7 @@ export default function AccessForm({ mode }: { mode: Mode }) {
           email, password,
           options: {
             emailRedirectTo: window.location.origin + "/auth/callback?next=" + encodeURIComponent(destination),
-            data: { full_name: name }, // Dados de exibição, nunca usados para autorização.
+            data: { full_name: name, aos_preference: persona }, // Preferência visual, nunca usada para autorizar permissões.
           },
         });
         if (error) throw error;
@@ -58,7 +58,8 @@ export default function AccessForm({ mode }: { mode: Mode }) {
           return;
         }
         const { data: profile } = await supabase.from("aos_profiles").select("preference").eq("user_id", result.user.id).maybeSingle();
-        router.push(profile?.preference === "mentor" ? "/mentor" : "/afiliado");
+        const preferred = profile?.preference === "mentor" || (!profile && result.user.user_metadata?.aos_preference === "mentor");
+        router.push(preferred ? "/mentor" : "/afiliado");
         router.refresh();
         return;
       }

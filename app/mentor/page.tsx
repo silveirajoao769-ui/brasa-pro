@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { signOut } from "@/lib/affiliate/signout";
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { approveJoin, createAssignment, createCohort } from "@/lib/affiliate/actions";
@@ -36,7 +37,7 @@ export default async function MentorPage({searchParams}:{searchParams:Promise<{s
   const broken=[cohortsResult.error,enrollmentsResult.error,requestsResult.error,tasksResult.error].some(Boolean);
 
   return <main className="aos-root aos-workspace"><div className="aos-workspace-shell">
-    <aside className="aos-work-nav"><Link href="/" className="aos-logo"><span className="aos-logo-mark">A<span>↗</span></span><span>afiliado<span className="aos-logo-accent">OS</span><small>OPERATING SYSTEM</small></span></Link><h3>MINHAS TURMAS</h3><Link href="/mentor" className="active">◫ Painel do mentor</Link><a href="#turmas">◇ Turmas</a><a href="#pedidos">☰ Pedidos de entrada</a><a href="#tarefas">◎ Acompanhamento</a><h3>OUTROS</h3><Link href="/afiliado">↗ Painel afiliado</Link><Link href="/acesso">↪ Conta</Link></aside>
+    <aside className="aos-work-nav"><Link href="/" className="aos-logo"><span className="aos-logo-mark">A<span>↗</span></span><span>afiliado<span className="aos-logo-accent">OS</span><small>OPERATING SYSTEM</small></span></Link><h3>MINHAS TURMAS</h3><Link href="/mentor" className="active">◫ Painel do mentor</Link><a href="#turmas">◇ Turmas</a><a href="#pedidos">☰ Pedidos de entrada</a><a href="#tarefas">◎ Acompanhamento</a><h3>OUTROS</h3><Link href="/afiliado">↗ Painel afiliado</Link><form action={signOut} className="aos-signout"><button type="submit">↪ Sair da conta</button></form></aside>
     <section className="aos-work-content">
       <div className="aos-work-top"><span>VISÃO GERAL / MENTOR</span><span className="aos-tag">● MVP EM TESTES</span></div>
       <div className="aos-work-title"><div><span className="aos-overline">CENTRAL DO MENTOR</span><h1>Da aula à execução.</h1><p>Organize turmas, aprove alunos e distribua atividades práticas.</p></div><Link href="/afiliado" className="aos-btn aos-btn-outline">Ver como afiliado ↗</Link></div>

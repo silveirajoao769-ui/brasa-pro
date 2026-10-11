@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { signOut } from "@/lib/affiliate/signout";
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { createCampaign, recordCommission, requestJoin, toggleTask } from "@/lib/affiliate/actions";
@@ -34,7 +35,7 @@ export default async function AffiliatePage({searchParams}:{searchParams:Promise
   const pending=commissions.filter(c=>c.status==="pending").reduce((s,c)=>s+Number(c.amount_cents||0),0);
   const errors=[profile.error,campaignsQuery.error,commissionsQuery.error,tasksQuery.error,membershipsQuery.error,pendingQuery.error].some(Boolean);
   return <main className="aos-root aos-workspace"><div className="aos-workspace-shell">
-    <aside className="aos-work-nav"><Link className="aos-logo" href="/"><span className="aos-logo-mark">A<span>↗</span></span><span>afiliado<span className="aos-logo-accent">OS</span><small>OPERATING SYSTEM</small></span></Link><h3>MINHA OPERAÇÃO</h3><Link href="/afiliado" className="active">◫ Visão geral</Link><a href="#campanhas">↗ Campanhas</a><a href="#comissoes">▣ Comissões</a><a href="#atividades">◎ Atividades</a><a href="#turmas">◇ Minhas turmas</a><h3>OUTROS</h3><Link href="/mentor">♧ Painel mentor</Link><Link href="/acesso">↪ Conta</Link></aside>
+    <aside className="aos-work-nav"><Link className="aos-logo" href="/"><span className="aos-logo-mark">A<span>↗</span></span><span>afiliado<span className="aos-logo-accent">OS</span><small>OPERATING SYSTEM</small></span></Link><h3>MINHA OPERAÇÃO</h3><Link href="/afiliado" className="active">◫ Visão geral</Link><a href="#campanhas">↗ Campanhas</a><a href="#comissoes">▣ Comissões</a><a href="#atividades">◎ Atividades</a><a href="#turmas">◇ Minhas turmas</a><h3>OUTROS</h3><Link href="/mentor">♧ Painel mentor</Link><form action={signOut} className="aos-signout"><button type="submit">↪ Sair da conta</button></form></aside>
     <section className="aos-work-content">
       <div className="aos-work-top"><span>VISÃO GERAL / AFILIADO</span><span className="aos-tag">● MVP EM TESTES</span></div>
       <div className="aos-work-title"><div><span className="aos-overline">SUA OPERAÇÃO</span><h1>Olá, {name.split(" ")[0]} 👋</h1><p>Organize suas ações e acompanhe números que você informou.</p></div><Link href="/mentor" className="aos-btn aos-btn-outline">Sou mentor ↗</Link></div>

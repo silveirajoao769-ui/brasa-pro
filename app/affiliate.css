@@ -214,3 +214,5 @@
  .aos-card {padding:15px;overflow-x:auto}
  .aos-work-title {display:block}
 }
+
+.aos-work-nav .aos-signout button{display:flex;align-items:center;width:100%;border:0;cursor:pointer;text-align:left;gap:12px;padding:12px 14px;border-radius:9px;color:#b0bbcf;background:transparent;font-size:12px}.aos-work-nav .aos-signout button:hover{background:rgba(73,231,182,.09);color:var(--aos-primary)}

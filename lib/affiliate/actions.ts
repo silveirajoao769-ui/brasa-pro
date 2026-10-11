@@ -87,6 +87,7 @@ export async function requestJoin(form: FormData) {
     redirect("/afiliado?status=invalid_code");
   }
   const { error } = await db.from("aos_join_requests").insert({user_id:user.id,invite_code});
+  if (error?.code === "23503") redirect("/afiliado?status=invalid_code");
   if (error && error.code !== "23505") redirect("/afiliado?status=save_error");
   revalidatePath("/afiliado");
   redirect("/afiliado?status=request_received");
