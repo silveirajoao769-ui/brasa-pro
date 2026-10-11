@@ -31,7 +31,11 @@ export default async function AffiliatePage({searchParams}:{searchParams:Promise
     db.rpc("aos_my_financial_summary").single()
   ]);
   const campaigns=campaignsQuery.data||[], commissions=commissionsQuery.data||[], tasks=tasksQuery.data||[];
-  const totals=totalsQuery.data;
+  const totals=totalsQuery.data as null | {
+    spent_cents: number | string | null;
+    received_cents: number | string | null;
+    pending_cents: number | string | null;
+  };
   const spent=totals?.spent_cents == null ? null : Number(totals.spent_cents);
   const paid=totals?.received_cents == null ? null : Number(totals.received_cents);
   const pending=totals?.pending_cents == null ? null : Number(totals.pending_cents);
